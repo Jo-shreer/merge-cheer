@@ -12,7 +12,8 @@ Automation already in this repo:
 
 | Workflow | What it does | Secrets |
 |----------|--------------|---------|
-| [Publish Docker](.github/workflows/publish-docker.yml) | Build/push Hub image on Release publish or dispatch | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
+| [Release](.github/workflows/release.yml) (`docker` job) | Push Hub image after reviewed Release | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
+| [Publish Docker](.github/workflows/publish-docker.yml) | Manual Hub retry | same |
 | [Mirror to GitLab](.github/workflows/mirror-gitlab.yml) | Push tags/main to GitLab (optional) | `GITLAB_MIRROR_TOKEN` (optional `GITLAB_PROJECT_PATH`) |
 
 ## GitLab CI/CD Catalog
@@ -63,10 +64,12 @@ A usable pipe needs a **public Docker image**. The UI catalog is separate.
 
 ### Docker Hub (automatable from GitHub)
 
-1. Create a Docker Hub account / namespace (for example `yauhenbichel`).
-2. Add GitHub Actions secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
-3. Either publish a GitHub Release (triggers **Publish Docker**) or run
-   Actions → **Publish Docker** → version `v1.4.0`.
+1. Create a Docker Hub account / namespace that will own the pipe image.
+2. Add GitHub Actions secrets:
+   - `DOCKERHUB_USERNAME` — Hub **username** (not email)
+   - `DOCKERHUB_TOKEN` — Hub **Access Token** (Read & Write), no newline
+3. Run Actions → **Release** with version `v1.4.0` (docker job pushes),
+   or Actions → **Publish Docker** for a retry.
 4. Keep `pipe.yml` pointing at that image (tag without the leading `v`).
 
 ### Consumers

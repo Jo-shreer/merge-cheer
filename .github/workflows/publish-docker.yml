@@ -1,16 +1,13 @@
 name: Publish Docker
 
-# Builds the Bitbucket Pipe image and pushes it to Docker Hub.
-# Secrets (repo Settings → Secrets and variables → Actions):
-#   DOCKERHUB_USERNAME
-#   DOCKERHUB_TOKEN   (Hub Access Token with Read, Write, Delete)
+# Manual retry for the Bitbucket pipe image. Normal path is the `docker`
+# job inside the Release workflow.
 #
-# Triggers: reviewed GitHub Release published, or manual dispatch for a
-# existing semver tag. Image tags: 1.4.0 (no leading v) and latest.
+# Secrets: DOCKERHUB_USERNAME (Hub username, not email) and
+# DOCKERHUB_TOKEN (Hub Access Token Read & Write — not account password).
+# No trailing newline in either secret.
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       version:
@@ -32,14 +29,12 @@ jobs:
       - name: Resolve version
         id: ver
         env:
-          INPUT_VERSION: ${{ inputs.version }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          TAG="${INPUT_VERSION:-$RELEASE_TAG}"
-          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "image_tag=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${VERSION#v}" >> "$GITHUB_OUTPUT"
 
       - name: Require Docker Hub secrets
         env:
@@ -49,6 +44,13 @@ jobs:
           set -euo pipefail
           if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
             echo "::error::Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets."
+            echo "::error::USERNAME = Hub username, not email."
+            echo "::error::TOKEN = Hub Access Token (Read & Write), not account password."
+            exit 1
+          fi
+          if [ "$DOCKERHUB_USERNAME" != "$(printf '%s' "$DOCKERHUB_USERNAME")" ] || \
+             [ "$DOCKERHUB_TOKEN" != "$(printf '%s' "$DOCKERHUB_TOKEN")" ]; then
+            echo "::error::DOCKERHUB_* secrets must not contain leading/trailing whitespace or newlines."
             exit 1
           fi
 
