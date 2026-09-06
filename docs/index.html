@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Merge Cheer — GIF on merge</title>
+  <meta name="description" content="Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges.">
+  <link rel="canonical" href="https://yauhenbichel.github.io/merge-cheer/">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f7f4fb;
+      --ink: #1b1324;
+      --mute: #5c5268;
+      --line: #e4dced;
+      --accent: #6d28d9;
+      --code: #efeaf6;
+      --card: #fff;
+      --radius: 0.85rem;
+      --space: clamp(1rem, 3vw, 1.5rem);
+      --measure: 46rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #120e18;
+        --ink: #f3eef8;
+        --mute: #b7adc4;
+        --line: #2f2838;
+        --accent: #c4b5fd;
+        --code: #1c1724;
+        --card: #1a1522;
+      }
+    }
+    * { box-sizing: border-box; }
+    html {
+      background: var(--paper);
+      color: var(--ink);
+      font: 1.02rem/1.55 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    }
+    body { margin: 0; }
+    main { width: min(var(--measure), 100% - 2 * var(--space)); margin: 0 auto; padding: 2rem 0 3rem; }
+    h1 { font-size: 1.8rem; line-height: 1.2; margin: 0 0 0.4rem; }
+    h2 { font-size: 1.15rem; margin: 2rem 0 0.6rem; }
+    p, li { color: var(--ink); }
+    .mute, .lede { color: var(--mute); }
+    a { color: var(--accent); }
+    .links { display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+    pre {
+      overflow-x: auto;
+      padding: 0.9rem 1rem;
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font: 0.86rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+      gap: 0.7rem;
+      margin: 1rem 0;
+    }
+    figure {
+      margin: 0;
+      padding: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      text-align: center;
+    }
+    figure img { display: block; width: 100%; height: auto; border-radius: 0.4rem; }
+    figcaption { margin-top: 0.35rem; font-size: 0.8rem; color: var(--mute); }
+    footer { margin-top: 2.5rem; color: var(--mute); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Merge Cheer</h1>
+    <p class="lede">Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges.</p>
+    <ul class="links">
+      <li><a href="https://github.com/YauhenBichel/merge-cheer">GitHub repo</a></li>
+      <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.1.0">Release v1.1.0</a></li>
+    </ul>
+
+    <h2>GIF on merge</h2>
+    <p>No Giphy key. No checkout of the pull request. The Action ships its own GIF groups and, by default, picks one from the title. Pin a group with <code>topic</code> when you want one mood every time.</p>
+
+    <div class="grid">
+      <figure><img src="gifs/ship/ship-it.gif" alt="ship GIF"><figcaption>ship</figcaption></figure>
+      <figure><img src="gifs/fix/nailed-it.gif" alt="fix GIF"><figcaption>fix</figcaption></figure>
+      <figure><img src="gifs/docs/nice-work.gif" alt="docs GIF"><figcaption>docs</figcaption></figure>
+      <figure><img src="gifs/tests/high-five.gif" alt="tests GIF"><figcaption>tests</figcaption></figure>
+      <figure><img src="gifs/cleanup/cleanup.gif" alt="cleanup GIF"><figcaption>cleanup</figcaption></figure>
+      <figure><img src="gifs/celebration/celebration.gif" alt="celebration GIF"><figcaption>celebration</figcaption></figure>
+      <figure><img src="gifs/welcome/high-five.gif" alt="welcome GIF"><figcaption>welcome</figcaption></figure>
+      <figure><img src="gifs/party/confetti.gif" alt="party GIF"><figcaption>party</figcaption></figure>
+      <figure><img src="gifs/space/planet.gif" alt="space GIF"><figcaption>space</figcaption></figure>
+      <figure><img src="gifs/magic/wand.gif" alt="magic GIF"><figcaption>magic</figcaption></figure>
+      <figure><img src="gifs/coffee/mug.gif" alt="coffee GIF"><figcaption>coffee</figcaption></figure>
+      <figure><img src="gifs/robot/wave.gif" alt="robot GIF"><figcaption>robot</figcaption></figure>
+    </div>
+
+    <h2>Install</h2>
+    <pre>name: Celebrate merge
+on:
+  pull_request_target:
+    types: [closed]
+permissions:
+  pull-requests: write
+jobs:
+  celebrate:
+    if: github.event.pull_request.merged &amp;&amp; github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: YauhenBichel/merge-cheer@v1.1.0</pre>
+    <p class="mute">Pin <code>@v1.1.0</code> (current release). <code>@v1</code> is the older first release.</p>
+
+    <h2>Topics</h2>
+    <p><code>topic</code> is <code>auto</code> when unset. Allowed names: <code>auto</code>, <code>ship</code>, <code>fix</code>, <code>docs</code>, <code>tests</code>, <code>cleanup</code>, <code>celebration</code>, <code>welcome</code>, <code>party</code>, <code>space</code>, <code>magic</code>, <code>coffee</code>, <code>robot</code>.</p>
+
+    <h2>Used by</h2>
+    <p>6 public repositories already run Merge Cheer on the default branch.</p>
+    <p><strong>MoleCare</strong></p>
+    <ul>
+      <li><a href="https://github.com/MoleCare/molecare-mcp">MoleCare/molecare-mcp</a></li>
+      <li><a href="https://github.com/MoleCare/molecare-ml">MoleCare/molecare-ml</a></li>
+      <li><a href="https://github.com/MoleCare/molecare-desktop">MoleCare/molecare-desktop</a></li>
+      <li><a href="https://github.com/MoleCare/molecare-skin-llm">MoleCare/molecare-skin-llm</a></li>
+      <li><a href="https://github.com/MoleCare/.github">MoleCare/.github</a></li>
+    </ul>
+    <p><strong>Personal</strong></p>
+    <ul>
+      <li><a href="https://github.com/YauhenBichel/readme-contributors">YauhenBichel/readme-contributors</a></li>
+    </ul>
+    <p class="mute">To be listed, merge a celebrate workflow that <code>uses: YauhenBichel/merge-cheer@v1.1.0</code> on the default branch.</p>
+
+    <footer>
+      <a href="https://github.com/YauhenBichel/merge-cheer">YauhenBichel/merge-cheer</a>
+      · MIT
+    </footer>
+  </main>
+</body>
+</html>

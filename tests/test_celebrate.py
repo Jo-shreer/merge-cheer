@@ -213,6 +213,24 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("github.event.repository.default_branch", dogfood)
         self.assertNotIn("pull_request.head", dogfood)
 
+    def test_pages_site_is_public_and_searchable(self) -> None:
+        html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        pages = (ROOT / ".github" / "workflows" / "pages.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("<title>Merge Cheer", html)
+        self.assertIn("GIF on merge", html)
+        self.assertIn("YauhenBichel/merge-cheer@v1.1.0", html)
+        self.assertIn("gifs/ship/ship-it.gif", html)
+        self.assertIn("MoleCare/molecare-mcp", html)
+        self.assertNotIn("/Users/", html)
+        self.assertNotIn("DevBox/", html)
+        self.assertNotIn("marketplace/actions", html)
+        self.assertIn("https://yauhenbichel.github.io/merge-cheer/", readme)
+        self.assertIn("actions/deploy-pages", pages)
+        self.assertIn("cp -R gifs _site/gifs", pages)
+
     def test_contributors_push_does_not_add_missing_readme_names(self) -> None:
         """Ubuntu git is case-sensitive; `git add README` exits 128."""
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
