@@ -2,29 +2,52 @@
 
 The GitHub Action stays the source. GitLab and Bitbucket reuse
 `src/celebrate.py`. GIFs stay on GitHub raw URLs. This file is the
-listing work a human still has to do — neither catalog can be ticked
-from this repository alone.
+listing work a human still has to do — neither catalog can be fully
+ticked from GitHub alone (no Marketplace MCP; GitHub Marketplace itself
+still needs a browser + 2FA tick).
 
 Do not claim a listing is live until the catalog URL returns 200.
+
+Automation already in this repo:
+
+| Workflow | What it does | Secrets |
+|----------|--------------|---------|
+| [Publish Docker](.github/workflows/publish-docker.yml) | Build/push Hub image on Release publish or dispatch | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
+| [Mirror to GitLab](.github/workflows/mirror-gitlab.yml) | Push tags/main to GitLab (optional) | `GITLAB_MIRROR_TOKEN` (optional `GITLAB_PROJECT_PATH`) |
 
 ## GitLab CI/CD Catalog
 
 GitLab’s marketplace is the [CI/CD Catalog](https://gitlab.com/explore/catalog).
-A component project must live **on GitLab**.
+A component project must live **on GitLab**. GitHub cannot publish into
+that catalog via API.
 
-1. Create a public GitLab project (for example `yauhenbichel/merge-cheer`).
-2. Mirror this GitHub repo into it (pull mirror, or push both remotes).
-3. Set a project description. Keep `README.md` and `templates/merge-cheer.yml`.
+### One-time setup
+
+1. Create a public GitLab project: `YauhenBichel/merge-cheer`
+   (namespace must match your GitLab username).
+2. Choose **one** sync path:
+   - **Preferred:** GitLab → Settings → Repository → Mirroring
+     repositories → Pull from
+     `https://github.com/YauhenBichel/merge-cheer.git` (mirror tags).
+   - **Or:** add GitHub secret `GITLAB_MIRROR_TOKEN` (Project Access
+     Token with `write_repository` + `api`) and rely on
+     **Mirror to GitLab**. Optional secret `GITLAB_PROJECT_PATH`
+     (default `YauhenBichel/merge-cheer`).
+3. Set a project description. Keep `README.md` and
+   `templates/merge-cheer.yml`.
 4. Settings → General → Visibility → **CI/CD Catalog project** (Owner).
-5. Add a project access token named `GITLAB_TOKEN` with `api` scope.
-   `CI_JOB_TOKEN` cannot post merge-request notes.
-6. Push a semver tag (`v1.3.0`). `.gitlab-ci.yml` runs tests, then a
-   `release:` job. GitLab only indexes versions created with that keyword.
-7. Search the catalog for Merge Cheer. The include path is:
+5. Add a project access token named `GITLAB_TOKEN` with `api` scope for
+   consumers (posting MR notes). `CI_JOB_TOKEN` cannot post notes.
+
+### Publish a Catalog version
+
+Push or mirror semver tag `v1.4.0`. `.gitlab-ci.yml` runs tests, then a
+`release:` job. **GitLab only indexes versions created with that
+keyword** (not the Releases REST API alone).
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/yauhenbichel/merge-cheer/merge-cheer@v1.3.0
+  - component: $CI_SERVER_FQDN/YauhenBichel/merge-cheer/merge-cheer@v1.4.0
     inputs:
       topic: auto
       token: $GITLAB_TOKEN
@@ -36,28 +59,38 @@ Until the catalog row exists, consumers can copy
 ## Bitbucket Pipes
 
 Bitbucket’s directory is [Pipes](https://support.atlassian.com/bitbucket-cloud/docs/what-are-pipes/).
-A complete pipe needs a public Docker image.
+A usable pipe needs a **public Docker image**. The UI catalog is separate.
 
-1. Build and push `yauhenbichel/merge-cheer:1.3.0` from this `Dockerfile`
-   (Docker Hub account required).
-2. Keep `pipe.yml` pointing at that image.
-3. Store `BITBUCKET_ACCESS_TOKEN` on the consumer repo (pullrequest write).
-4. To appear in the Pipelines UI catalog, open a PR against
-   [official-pipes](https://bitbucket.org/atlassian/official-pipes) with a
-   `pipes/merge-cheer.yml` manifest. Atlassian reviews it.
-5. Until that review lands, consumers run
-   [examples/bitbucket-pipelines.yml](examples/bitbucket-pipelines.yml)
-   or:
+### Docker Hub (automatable from GitHub)
+
+1. Create a Docker Hub account / namespace (for example `yauhenbichel`).
+2. Add GitHub Actions secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
+3. Either publish a GitHub Release (triggers **Publish Docker**) or run
+   Actions → **Publish Docker** → version `v1.4.0`.
+4. Keep `pipe.yml` pointing at that image (tag without the leading `v`).
+
+### Consumers
+
+Store `BITBUCKET_ACCESS_TOKEN` on the consumer repo (pullrequest write):
 
 ```yaml
 script:
-  - pipe: docker://yauhenbichel/merge-cheer:1.3.0
+  - pipe: docker://yauhenbichel/merge-cheer:1.4.0
     variables:
       TOPIC: auto
       BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN
 ```
 
+Until the image exists, use the curl job in
+[examples/bitbucket-pipelines.yml](examples/bitbucket-pipelines.yml).
+
+### Official Pipelines UI catalog (human review)
+
+Open a PR against [official-pipes](https://bitbucket.org/atlassian/official-pipes)
+with a `pipes/merge-cheer.yml` manifest. There is **no API** to skip that
+review. Atlassian merges it before the pipe appears in the Pipelines UI.
+
 ## GitHub Marketplace
 
-Still the browser tick on `releases/edit/<tag>` for the first listing.
-See [RELEASE.md](RELEASE.md).
+Still the browser tick on `releases/edit/<tag>` for the first listing
+(no API; 2FA required). See [RELEASE.md](RELEASE.md).
