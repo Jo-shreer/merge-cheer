@@ -165,9 +165,12 @@ python3 -m unittest discover -s tests -q
 
 ## Publish a release
 
-Current release is `v1.1.0` (`@v1` is the first tag). Marketplace
-listing is **Settings → Actions → Publish** after a tag exists. Do not
-add a Marketplace badge until that listing is live.
+Current release is `v1.1.0` (`@v1` is the first tag, not a floating
+major). A Marketplace-facing Release is tests plus a human review —
+see [RELEASE.md](RELEASE.md). Pushing a tag does not publish. After
+the reviewed Release exists, tick Marketplace on
+`releases/edit/<tag>` for the **first** listing only. Do not add a
+Marketplace badge until that listing is live.
 
 The site is [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/).
 The first Pages job 404s until you turn the site on in a browser:
