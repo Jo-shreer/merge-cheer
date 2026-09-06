@@ -1,0 +1,39 @@
+name: Merge Cheer
+description: Comment a G-rated celebration GIF when a pull request merges. Zero config.
+author: Yauhen Bichel
+branding:
+  icon: award
+  color: purple
+
+inputs:
+  github-token:
+    description: Token used to comment on the pull request.
+    default: ${{ github.token }}
+  giphy-api-key:
+    description: Optional Giphy key. When unset, the bundled GIFs are used.
+    required: false
+    default: ""
+  message:
+    description: Comment text. `{author}` becomes the pull request author.
+    default: "Merged — thank you @{author}."
+  rating:
+    description: Giphy content rating when a key is set.
+    default: "g"
+
+runs:
+  using: composite
+  steps:
+    - name: Comment a celebration GIF
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GIPHY_API_KEY: ${{ inputs.giphy-api-key }}
+        GIPHY_RATING: ${{ inputs.rating }}
+        MESSAGE: ${{ inputs.message }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        ACTION_REPO: ${{ github.action_repository }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: python3 "${{ github.action_path }}/src/celebrate.py"
