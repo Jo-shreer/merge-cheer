@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Merge Cheer — GIF on merge</title>
-  <meta name="description" content="Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges.">
+  <meta name="description" content="Live demo: a GitHub Action that comments a G-rated celebration GIF when a pull request merges. No Giphy key.">
   <link rel="canonical" href="https://yauhenbichel.github.io/merge-cheer/">
   <style>
     :root {
@@ -45,6 +45,8 @@
     .mute, .lede { color: var(--mute); }
     a { color: var(--accent); }
     .links { display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+    .steps { margin: 0.6rem 0 1rem; padding-left: 1.2rem; }
+    .steps li { margin: 0.35rem 0; }
     pre {
       overflow-x: auto;
       padding: 0.9rem 1rem;
@@ -53,10 +55,25 @@
       border-radius: var(--radius);
       font: 0.86rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
-    .grid {
+    .comment {
+      margin: 1rem 0 0;
+      padding: 0.85rem 1rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .comment .who { margin: 0 0 0.55rem; font-size: 0.8rem; color: var(--mute); }
+    .comment p { margin: 0 0 0.7rem; }
+    .comment img {
+      display: block;
+      width: min(16rem, 100%);
+      height: auto;
+      border-radius: 0.4rem;
+    }
+    .demo {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
-      gap: 0.7rem;
+      grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+      gap: 0.8rem;
       margin: 1rem 0;
     }
     figure {
@@ -75,36 +92,36 @@
 <body>
   <main>
     <h1>Merge Cheer</h1>
-    <p class="lede">Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges.</p>
+    <p class="lede">Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges. This page is the live demo.</p>
     <ul class="links">
       <li><a href="https://github.com/YauhenBichel/merge-cheer">GitHub repo</a></li>
-      <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.1.0">Release v1.1.0</a></li>
+      <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.3.0">Release v1.3.0</a></li>
     </ul>
 
-    <h2>GIF on merge</h2>
-    <p>No Giphy key. No checkout of the pull request. The Action ships its own GIF groups and, by default, picks a <strong>random theme</strong> (seeded by the pull request number so the same PR stays stable). Pin a group with <code>topic</code> when you want one mood every time. Use <code>topic: title</code> to pick from the title instead.</p>
+    <h2>What happens on merge</h2>
+    <ol class="steps">
+      <li>A human pull request merges. Bots are skipped.</li>
+      <li>The Action posts one comment. It does not check out the pull request.</li>
+      <li>The comment is a thank-you plus a G-rated GIF the Action already ships. No Giphy key.</li>
+    </ol>
+    <div class="comment">
+      <p class="who">The comment looks like this</p>
+      <p>Merged — thank you @alice.</p>
+      <img src="gifs/comic/pop.gif" alt="comic celebration GIF posted on the merged pull request">
+    </div>
 
-    <div class="grid">
-      <figure><img src="gifs/ship/ship-it.gif" alt="ship GIF"><figcaption>ship</figcaption></figure>
-      <figure><img src="gifs/fix/nailed-it.gif" alt="fix GIF"><figcaption>fix</figcaption></figure>
-      <figure><img src="gifs/docs/nice-work.gif" alt="docs GIF"><figcaption>docs</figcaption></figure>
-      <figure><img src="gifs/tests/high-five.gif" alt="tests GIF"><figcaption>tests</figcaption></figure>
-      <figure><img src="gifs/cleanup/cleanup.gif" alt="cleanup GIF"><figcaption>cleanup</figcaption></figure>
-      <figure><img src="gifs/celebration/celebration.gif" alt="celebration GIF"><figcaption>celebration</figcaption></figure>
-      <figure><img src="gifs/welcome/high-five.gif" alt="welcome GIF"><figcaption>welcome</figcaption></figure>
-      <figure><img src="gifs/party/confetti.gif" alt="party GIF"><figcaption>party</figcaption></figure>
-      <figure><img src="gifs/space/planet.gif" alt="space GIF"><figcaption>space</figcaption></figure>
-      <figure><img src="gifs/magic/wand.gif" alt="magic GIF"><figcaption>magic</figcaption></figure>
-      <figure><img src="gifs/coffee/mug.gif" alt="coffee GIF"><figcaption>coffee</figcaption></figure>
-      <figure><img src="gifs/robot/wave.gif" alt="robot GIF"><figcaption>robot</figcaption></figure>
-      <figure><img src="gifs/comic/burst.gif" alt="comic GIF"><figcaption>comic</figcaption></figure>
+    <h2>Live loops</h2>
+    <p>Four of the shipped GIFs, looping here. Default <code>topic: auto</code> picks a <strong>random theme</strong> (seeded by the pull request number, so the same PR stays stable). Pin a group when you want one mood every time.</p>
+    <div class="demo">
+      <figure><img src="gifs/comic/pop.gif" alt="comic pop GIF"><figcaption>comic</figcaption></figure>
       <figure><img src="gifs/sunny/sun.gif" alt="sunny GIF"><figcaption>sunny</figcaption></figure>
       <figure><img src="gifs/game/levelup.gif" alt="game GIF"><figcaption>game</figcaption></figure>
       <figure><img src="gifs/sticker/star.gif" alt="sticker GIF"><figcaption>sticker</figcaption></figure>
-      <figure><img src="gifs/yeah/pump.gif" alt="yeah GIF"><figcaption>yeah</figcaption></figure>
     </div>
+    <p class="mute">Also on the Action: ship, fix, docs, tests, cleanup, celebration, welcome, party, space, magic, coffee, robot, yeah. <code>topic: title</code> is the old picker (it reads the PR title).</p>
 
     <h2>Install</h2>
+    <p>Default is <code>topic: auto</code> — a random shipped theme, then one GIF in that group.</p>
     <pre>name: Celebrate merge
 on:
   pull_request_target:
@@ -116,14 +133,15 @@ jobs:
     if: github.event.pull_request.merged &amp;&amp; github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
-      - uses: YauhenBichel/merge-cheer@v1.1.0</pre>
-    <p class="mute">Pin <code>@v1.1.0</code> (current release). <code>@v1</code> is the older first release.</p>
-
-    <h2>Topics</h2>
-    <p><code>topic</code> is <code>auto</code> when unset: a random shipped theme, then one GIF in that group. Different PR numbers can land on different groups. Allowed names: <code>auto</code>, <code>title</code>, <code>ship</code>, <code>fix</code>, <code>docs</code>, <code>tests</code>, <code>cleanup</code>, <code>celebration</code>, <code>welcome</code>, <code>party</code>, <code>space</code>, <code>magic</code>, <code>coffee</code>, <code>robot</code>, <code>comic</code>, <code>sunny</code>, <code>game</code>, <code>sticker</code>, <code>yeah</code>. Pin a group (for example <code>topic: comic</code>) to keep that mood. An unknown name falls back to <code>celebration</code>.</p>
+      - uses: YauhenBichel/merge-cheer@v1.3.0</pre>
+    <p>Pin a theme when you want the same mood on every merge:</p>
+    <pre>- uses: YauhenBichel/merge-cheer@v1.3.0
+  with:
+    topic: comic   # or sunny, game, sticker, yeah, ship, …</pre>
+    <p class="mute">Pin <code>@v1.3.0</code> (current release). <code>@v1</code> is the older first release, not a floating major. An unknown <code>topic</code> falls back to <code>celebration</code>.</p>
 
     <h2>Used by</h2>
-    <p>6 public repositories already run Merge Cheer on the default branch.</p>
+    <p>8 public repositories already run Merge Cheer on the default branch, pinned to <code>@v1.3.0</code>.</p>
     <p><strong>MoleCare</strong></p>
     <ul>
       <li><a href="https://github.com/MoleCare/molecare-mcp">MoleCare/molecare-mcp</a></li>
@@ -132,11 +150,13 @@ jobs:
       <li><a href="https://github.com/MoleCare/molecare-skin-llm">MoleCare/molecare-skin-llm</a></li>
       <li><a href="https://github.com/MoleCare/.github">MoleCare/.github</a></li>
     </ul>
-    <p><strong>Personal</strong></p>
+    <p><strong>Also</strong></p>
     <ul>
+      <li><a href="https://github.com/YauhenBichel/py-harness">YauhenBichel/py-harness</a></li>
+      <li><a href="https://github.com/YauhenBichel/python-vibe">YauhenBichel/python-vibe</a></li>
       <li><a href="https://github.com/YauhenBichel/readme-contributors">YauhenBichel/readme-contributors</a></li>
     </ul>
-    <p class="mute">To be listed, merge a celebrate workflow that <code>uses: YauhenBichel/merge-cheer@v1.1.0</code> on the default branch.</p>
+    <p class="mute">To be listed, merge a celebrate workflow that <code>uses: YauhenBichel/merge-cheer@v1.3.0</code> on the default branch.</p>
 
     <footer>
       <a href="https://github.com/YauhenBichel/merge-cheer">YauhenBichel/merge-cheer</a>
