@@ -41,6 +41,8 @@ jobs:
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
+          cp docs/merge-cheer-demo.mp4 _site/merge-cheer-demo.mp4
+          cp docs/merge-cheer-demo-poster.png _site/merge-cheer-demo-poster.png
           cp -R gifs _site/gifs
       - uses: actions/upload-pages-artifact@v5
 

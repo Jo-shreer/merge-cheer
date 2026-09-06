@@ -86,6 +86,16 @@
     }
     figure img { display: block; width: 100%; height: auto; border-radius: 0.4rem; }
     figcaption { margin-top: 0.35rem; font-size: 0.8rem; color: var(--mute); }
+    .demo-video {
+      display: block;
+      width: 100%;
+      margin: 1rem 0 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .why { margin: 1rem 0 0; padding-left: 1.2rem; }
+    .why li { margin: 0.45rem 0; }
     footer { margin-top: 2.5rem; color: var(--mute); font-size: 0.9rem; }
   </style>
 </head>
@@ -96,6 +106,17 @@
     <ul class="links">
       <li><a href="https://github.com/YauhenBichel/merge-cheer">GitHub repo</a></li>
       <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.3.0">Release v1.3.0</a></li>
+    </ul>
+
+    <h2 id="demo">Watch the demo</h2>
+    <video class="demo-video" src="merge-cheer-demo.mp4" poster="merge-cheer-demo-poster.png" controls muted playsinline width="1080" height="1080">
+      <a href="merge-cheer-demo.mp4">Download the 18s demo video</a>
+    </video>
+    <ul class="why">
+      <li><strong>What.</strong> Merge Cheer comments one G-rated GIF when a human pull request merges. Bots are skipped. The Action does not check out the pull request.</li>
+      <li><strong>Why.</strong> The merge is the moment people actually did the work. No Giphy key. The Action ships its own loops, so it works on a new repository with the default token.</li>
+      <li><strong>Where.</strong> Code is <a href="https://github.com/YauhenBichel/merge-cheer">YauhenBichel/merge-cheer</a>. Real comments already landed on <a href="https://github.com/YauhenBichel/py-harness/pull/350#issuecomment-5559092736">py-harness #350</a> and <a href="https://github.com/MoleCare/molecare-desktop/pull/26#issuecomment-5559101123">molecare-desktop #26</a>.</li>
+      <li><strong>How.</strong> Pin <code>YauhenBichel/merge-cheer@v1.3.0</code> on the default branch. Leave <code>topic</code> unset (or <code>topic: auto</code>) for a random theme, seeded by the pull request number. Pin <code>topic: comic</code> when you want the same mood every time.</li>
     </ul>
 
     <h2>What happens on merge</h2>
