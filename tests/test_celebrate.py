@@ -329,6 +329,16 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("pull-requests: write", text)
         self.assertIn("docs/contributors", text)
         self.assertIn("gh pr create", text)
+        self.assertIn(
+            "GitHub Actions is not permitted to create or approve pull requests",
+            text,
+        )
+        self.assertIn(
+            "https://github.com/YauhenBichel/merge-cheer/compare/main...docs/contributors",
+            text,
+        )
+        self.assertIn("exit 0", text)
+        self.assertIn("exit 1", text)
         self.assertNotIn("git push\n", text)
 
 
