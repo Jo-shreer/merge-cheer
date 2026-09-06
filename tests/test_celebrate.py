@@ -36,7 +36,18 @@ class CelebrateTest(unittest.TestCase):
         self.assertGreaterEqual(max(counts), 2)
 
     def test_mood_groups_have_two_owned_gifs(self) -> None:
-        for group in ("party", "space", "magic", "coffee", "robot"):
+        for group in (
+            "party",
+            "space",
+            "magic",
+            "coffee",
+            "robot",
+            "comic",
+            "sunny",
+            "game",
+            "sticker",
+            "yeah",
+        ):
             names = list((GIFS / group).glob("*.gif"))
             self.assertGreaterEqual(len(names), 2, group)
 
@@ -82,6 +93,16 @@ class CelebrateTest(unittest.TestCase):
             "coffee-night",
             "robot-wave",
             "robot-dance",
+            "comic-burst",
+            "comic-pop",
+            "sunny-sun",
+            "sunny-rainbow",
+            "game-levelup",
+            "game-combo",
+            "sticker-star",
+            "sticker-thumb",
+            "yeah-pump",
+            "yeah-jump",
         ):
             self.assertTrue((STILLS / f"{name}.png").is_file(), name)
 
@@ -101,6 +122,11 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.pick_from_title("chore: magic wand"), "magic")
         self.assertEqual(celebrate.pick_from_title("chore: coffee"), "coffee")
         self.assertEqual(celebrate.pick_from_title("chore: robot helper"), "robot")
+        self.assertEqual(celebrate.pick_from_title("chore: comic kapow"), "comic")
+        self.assertEqual(celebrate.pick_from_title("chore: sunny day"), "sunny")
+        self.assertEqual(celebrate.pick_from_title("chore: level-up combo"), "game")
+        self.assertEqual(celebrate.pick_from_title("chore: sticker pack"), "sticker")
+        self.assertEqual(celebrate.pick_from_title("chore: yeah let's go"), "yeah")
 
     def test_mood_keywords_do_not_steal_conventional_types(self) -> None:
         celebrate = _load()
@@ -108,6 +134,13 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.pick_from_title("fix: magic number"), "fix")
         self.assertEqual(celebrate.pick_from_title("docs: coffee guide"), "docs")
         self.assertEqual(celebrate.pick_from_title("namespace cleanup"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("feat: add comic mode"), "ship")
+        self.assertEqual(celebrate.pick_from_title("fix: combo overflow"), "fix")
+        self.assertEqual(celebrate.pick_from_title("docs: sticker pack"), "docs")
+        self.assertEqual(celebrate.pick_from_title("test: sunny path"), "tests")
+        self.assertEqual(celebrate.pick_from_title("refactor: yeah helper"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("chore: power"), "celebration")
+        self.assertEqual(celebrate.pick_from_title("chore: game night"), "celebration")
 
     def test_first_timer_generic_title_is_welcome(self) -> None:
         celebrate = _load()
@@ -134,6 +167,13 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.resolve_group("chore: bump", "magic"), "magic")
         self.assertEqual(celebrate.resolve_group("chore: bump", "coffee"), "coffee")
         self.assertEqual(celebrate.resolve_group("chore: bump", "bot"), "robot")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "comic"), "comic")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "kapow"), "comic")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "sunny"), "sunny")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "level-up"), "game")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "sticker"), "sticker")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "yeah"), "yeah")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "lets-go"), "yeah")
 
     def test_unknown_topic_falls_back_to_celebration(self) -> None:
         celebrate = _load()
@@ -205,6 +245,11 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("gifs/magic/wand.gif", text)
         self.assertIn("gifs/coffee/mug.gif", text)
         self.assertIn("gifs/robot/wave.gif", text)
+        self.assertIn("gifs/comic/burst.gif", text)
+        self.assertIn("gifs/sunny/sun.gif", text)
+        self.assertIn("gifs/game/levelup.gif", text)
+        self.assertIn("gifs/sticker/star.gif", text)
+        self.assertIn("gifs/yeah/pump.gif", text)
         self.assertIn(".github/workflows/celebrate.yml", text)
         dogfood = (ROOT / ".github" / "workflows" / "celebrate.yml").read_text(
             encoding="utf-8"

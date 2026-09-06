@@ -13,7 +13,8 @@ inputs:
     description: >
       GIF group. auto (default) picks from the PR title.
       Groups: ship, fix, docs, tests, cleanup, celebration, welcome,
-      party, space, magic, coffee, robot.
+      party, space, magic, coffee, robot, comic, sunny, game, sticker,
+      yeah.
     required: false
     default: "auto"
   giphy-api-key:
