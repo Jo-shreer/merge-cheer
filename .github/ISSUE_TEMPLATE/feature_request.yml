@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a topic, GIF, keyword, comment, or docs change
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep the Action stdlib-only. Changes that check out pull request
+        head on `pull_request_target` will be declined.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What can't you do today?
+      description: Describe the gap, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you add?
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Topic / GIF
+        - Title keywords
+        - Comment text
+        - Docs / CI
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: This stays G-rated and does not add live keys
+          required: true
+        - label: This does not check out pull request head
+          required: true

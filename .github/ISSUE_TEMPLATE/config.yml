@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/YauhenBichel/merge-cheer/issues/new?labels=security
+    about: Open a public issue. Do not paste live keys.
+  - name: Ideas and questions
+    url: https://github.com/YauhenBichel/merge-cheer/discussions
+    about: Design questions belong in Discussions.
