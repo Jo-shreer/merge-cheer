@@ -231,6 +231,40 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("actions/deploy-pages", pages)
         self.assertIn("cp -R gifs _site/gifs", pages)
 
+    def test_release_workflow_is_reviewed_not_automatic(self) -> None:
+        text = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("workflow_dispatch:", text)
+        self.assertIn("environment: marketplace", text)
+        self.assertIn("needs: test", text)
+        self.assertIn("contents: write", text)
+        self.assertIn("python3 -m unittest discover -s tests -q", text)
+        self.assertIn("gh release create", text)
+        self.assertIn("ref: ${{ inputs.version }}", text)
+        self.assertNotIn("pull_request_target", text)
+        self.assertNotIn("pull_request.head", text)
+        self.assertNotIn("git tag -f", text)
+        self.assertNotIn("--force", text)
+        on_block = text.split("permissions:", 1)[0]
+        self.assertNotIn("\n  push:", on_block)
+        self.assertNotIn("tags:", on_block)
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("uses:"):
+                continue
+            pin = stripped.split("@", 1)[-1].split()[0]
+            self.assertRegex(pin, r"^[0-9a-f]{40}$", stripped)
+        notes = (ROOT / "RELEASE.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("environment: marketplace", notes)
+        self.assertIn("Required reviewers", notes)
+        self.assertIn("releases/edit/", notes)
+        self.assertIn("RELEASE.md", readme)
+        self.assertNotIn("/Users/", notes)
+        self.assertNotIn("DevBox/", notes)
+        self.assertNotIn("marketplace/actions", notes)
+
     def test_contributors_push_does_not_add_missing_readme_names(self) -> None:
         """Ubuntu git is case-sensitive; `git add README` exits 128."""
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
@@ -247,6 +281,10 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("README.md", added)
         self.assertIn(".github/contributors.svg", added)
         self.assertEqual([name for name in added if name in forbidden], [])
+        self.assertIn("pull-requests: write", text)
+        self.assertIn("docs/contributors", text)
+        self.assertIn("gh pr create", text)
+        self.assertNotIn("git push\n", text)
 
 
 if __name__ == "__main__":

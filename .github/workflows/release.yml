@@ -1,0 +1,114 @@
+name: Release
+
+# Marketplace-facing GitHub Release. Not a tag-push hook.
+#
+# 1. Tests run on the exact tagged commit (never a pull request head).
+# 2. Job `release` needs those tests and the `marketplace` environment.
+#    The owner must add Required reviewers under
+#    Settings → Environments → marketplace, or this job will not pause.
+# 3. GitHub has no API for the Marketplace checkbox. After this job,
+#    open the printed edit URL and tick Publish on the first listing only.
+#
+# Semver tags only (vMAJOR.MINOR.PATCH). This workflow never force-moves v1.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing semver tag to release (vMAJOR.MINOR.PATCH, for example v1.2.0)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a semver tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          echo "Releasing ${VERSION} (semver only; v1 is not a ship tag here)."
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tests
+        run: python3 -m unittest discover -s tests -q
+
+  release:
+    needs: test
+    environment: marketplace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="$VERSION"
+          PREV="$(
+            git tag --list --sort=-v:refname \
+              | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+              | grep -vx "$TAG" \
+              | head -n1 || true
+          )"
+          {
+            echo "Topic groups pick a GIF from the pull request title."
+            echo "Zero-config: bundled G-rated GIFs, no Giphy key."
+            echo
+            if [ -n "$PREV" ]; then
+              echo "## Changes since ${PREV}"
+              echo
+              git log --pretty=format:'- %s' "${PREV}..${TAG}"
+              echo
+            else
+              echo "## Changes"
+              echo
+              git log --pretty=format:'- %s' "$TAG"
+              echo
+            fi
+            echo
+            echo "## Marketplace"
+            echo
+            echo "GitHub does not allow a fully unattended first-time Marketplace"
+            echo "publish. After this reviewed Release exists, open"
+            echo
+            echo "https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
+            echo
+            echo "and tick **Publish this Action to the GitHub Marketplace** on the"
+            echo "first listing only. Later releases update the listing if it is"
+            echo "already published."
+          } > "${RUNNER_TEMP}/notes.md"
+          gh release create "$TAG" \
+            --title "Merge Cheer ${TAG}" \
+            --notes-file "${RUNNER_TEMP}/notes.md" \
+            --verify-tag
+          echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+          echo "Marketplace edit: https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
+          {
+            echo "### Release ${TAG}"
+            echo
+            echo "Reviewed and published. Marketplace is still a browser tick"
+            echo "on the first listing:"
+            echo
+            echo "https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
+          } >> "$GITHUB_STEP_SUMMARY"
