@@ -60,10 +60,11 @@ Do not add a Marketplace badge until that listing is live.
 ## Docker Hub + GitLab (from GitHub Actions)
 
 1. **Docker Hub** — secrets `DOCKERHUB_USERNAME` (Hub username, not
-   email) and `DOCKERHUB_TOKEN` (Access Token with Read & Write; no
-   trailing newline). The **Release** workflow’s `docker` job pushes
-   the image after the reviewed GitHub Release. Manual retry: Actions →
-   **Publish Docker** → `v1.4.0`.
+   email) and `DOCKERHUB_TOKEN` (Access Token with Read & Write). Prefer
+   `printf '%s' '…' | gh secret set …` so the value has no trailing
+   newline. Workflows trim CR/LF before login. The **Release** workflow’s
+   `docker` job pushes the image after the reviewed GitHub Release.
+   Manual retry: Actions → **Publish Docker** → `v1.4.0`.
 2. **GitLab Catalog** — create `YauhenBichel/merge-cheer` on GitLab,
    enable **CI/CD Catalog project**, then either configure a GitLab
    **pull mirror** or set `GITLAB_MIRROR_TOKEN` and run **Mirror to
