@@ -64,7 +64,7 @@ Do not add a Marketplace badge until that listing is live.
    `printf '%s' '…' | gh secret set …` so the value has no trailing
    newline. Workflows trim CR/LF before login. The **Release** workflow’s
    `docker` job pushes the image after the reviewed GitHub Release.
-   Manual retry: Actions → **Publish Docker** → `v1.4.0`.
+   Manual retry: Actions → **Publish Docker** → `v1.4.1`.
 2. **GitLab Catalog** — create `YauhenBichel/merge-cheer` on GitLab,
    enable **CI/CD Catalog project**, then either configure a GitLab
    **pull mirror** or set `GITLAB_MIRROR_TOKEN` and run **Mirror to
