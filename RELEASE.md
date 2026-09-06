@@ -40,8 +40,9 @@ from automation.
 5. If tests fail, stop. Nothing is published.
 6. The **release** job then waits on the `marketplace` environment.
    Open the deployment review and click **Approve**.
-7. `gh release create` publishes the GitHub Release for that tag.
-   `action.yml` is not an asset — the tag **is** the Action version.
+7. The job creates the GitHub Release for that tag, or updates notes if
+   the Release already exists (safe to re-run). `action.yml` is not an
+   asset — the tag **is** the Action version.
 
 ## Marketplace (browser, first listing only)
 

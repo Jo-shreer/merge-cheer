@@ -98,16 +98,29 @@ jobs:
             echo "first listing only. Later releases update the listing if it is"
             echo "already published."
           } > "${RUNNER_TEMP}/notes.md"
-          gh release create "$TAG" \
-            --title "Merge Cheer ${TAG}" \
-            --notes-file "${RUNNER_TEMP}/notes.md" \
-            --verify-tag
+
+          # Idempotent: a parallel create, manual publish, or re-run must not
+          # fail the marketplace environment when the Release already exists.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "Merge Cheer ${TAG}" \
+              --notes-file "${RUNNER_TEMP}/notes.md"
+            echo "Release ${TAG} already existed — notes updated."
+          else
+            gh release create "$TAG" \
+              --title "Merge Cheer ${TAG}" \
+              --notes-file "${RUNNER_TEMP}/notes.md" \
+              --verify-tag
+            echo "Created Release ${TAG}."
+          fi
+
           echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
           echo "Marketplace edit: https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
           {
             echo "### Release ${TAG}"
             echo
-            echo "Reviewed and published. Marketplace is still a browser tick"
+            echo "Reviewed and published (create is idempotent if the tag"
+            echo "Release already exists). Marketplace is still a browser tick"
             echo "on the first listing:"
             echo
             echo "https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
