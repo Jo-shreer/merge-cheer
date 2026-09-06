@@ -4,7 +4,8 @@
 Layout is gifs/<group>/<name>.gif. A group may hold several files; the
 Action picks one. Motion is a short brightness pulse plus a tiny zoom.
 The `alt` file is the same still with the wave inverted — a cheap second
-option, not new art.
+option, not new art. Comic mood groups (`comic`, `sunny`, `game`,
+`sticker`, `yeah`) each use two original stills.
 """
 
 from __future__ import annotations
@@ -53,6 +54,16 @@ VARIANTS = (
     ("coffee-night", "coffee", "night", False),
     ("robot-wave", "robot", "wave", False),
     ("robot-dance", "robot", "dance", False),
+    ("comic-burst", "comic", "burst", False),
+    ("comic-pop", "comic", "pop", False),
+    ("sunny-sun", "sunny", "sun", False),
+    ("sunny-rainbow", "sunny", "rainbow", False),
+    ("game-levelup", "game", "levelup", False),
+    ("game-combo", "game", "combo", False),
+    ("sticker-star", "sticker", "star", False),
+    ("sticker-thumb", "sticker", "thumb", False),
+    ("yeah-pump", "yeah", "pump", False),
+    ("yeah-jump", "yeah", "jump", False),
 )
 
 # Drop frames, colors, then pixels if a still is too busy for 180 KB.

@@ -53,7 +53,8 @@ A good first change is one of:
 - a clearer default comment or dogfood message
 
 Groups today: `ship`, `fix`, `docs`, `tests`, `cleanup`,
-`celebration`, `welcome`, `party`, `space`, `magic`, `coffee`, `robot`.
+`celebration`, `welcome`, `party`, `space`, `magic`, `coffee`, `robot`,
+`comic`, `sunny`, `game`, `sticker`, `yeah`.
 
 Design questions go in [Discussions](https://github.com/YauhenBichel/merge-cheer/discussions), not a drive-by PR.
 

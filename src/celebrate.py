@@ -26,6 +26,11 @@ GROUPS = (
     "magic",
     "coffee",
     "robot",
+    "comic",
+    "sunny",
+    "game",
+    "sticker",
+    "yeah",
 )
 
 # Extra spellings that resolve to a group. `auto` is handled separately.
@@ -66,6 +71,20 @@ ALIASES = {
     "latte": "coffee",
     "robot": "robot",
     "bot": "robot",
+    "comic": "comic",
+    "kapow": "comic",
+    "sunny": "sunny",
+    "sunshine": "sunny",
+    "game": "game",
+    "level-up": "game",
+    "levelup": "game",
+    "combo": "game",
+    "sticker": "sticker",
+    "stickers": "sticker",
+    "yeah": "yeah",
+    "lets-go": "yeah",
+    "let's-go": "yeah",
+    "fist-pump": "yeah",
 }
 
 # Giphy search text when a key is set.
@@ -82,6 +101,11 @@ GIPHY_TAG = {
     "magic": "magic",
     "coffee": "coffee",
     "robot": "robot",
+    "comic": "comic",
+    "sunny": "sunny",
+    "game": "level up",
+    "sticker": "sticker",
+    "yeah": "yeah",
 }
 
 # Alt text for the posted image.
@@ -98,6 +122,11 @@ LABEL = {
     "magic": "magic",
     "coffee": "coffee",
     "robot": "robot",
+    "comic": "comic",
+    "sunny": "sunny",
+    "game": "game",
+    "sticker": "sticker",
+    "yeah": "yeah",
 }
 
 FIRST_TIMERS = frozenset({"FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"})
@@ -117,6 +146,11 @@ _TITLE_RULES = (
     ("magic", ("magic", "sparkle", "wand", "spell")),
     ("coffee", ("coffee", "latte", "caffeine", "espresso")),
     ("robot", ("robot", "android")),
+    ("comic", ("comic", "kapow")),
+    ("sunny", ("sunny", "sunshine", "sunbeam")),
+    ("game", ("level-up", "level up", "combo", "high-score", "high score")),
+    ("sticker", ("sticker",)),
+    ("yeah", ("yeah", "let's go", "lets go", "fist pump", "fist-pump")),
 )
 
 

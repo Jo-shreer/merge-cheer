@@ -41,13 +41,13 @@ Pin a group:
 ```yaml
 - uses: YauhenBichel/merge-cheer@v1.1.0
   with:
-    topic: ship   # or party, space, magic, coffee, robot
+    topic: ship   # or party, comic, sunny, game, sticker, yeah
 ```
 
 `topic` is `auto` when unset. Allowed names: `auto`, `ship`, `fix`,
 `docs`, `tests`, `cleanup`, `celebration`, `welcome`, `party`, `space`,
-`magic`, `coffee`, `robot`. An unknown name falls back to `celebration`
-and prints the list.
+`magic`, `coffee`, `robot`, `comic`, `sunny`, `game`, `sticker`, `yeah`.
+An unknown name falls back to `celebration` and prints the list.
 
 ## Live demo
 
@@ -65,6 +65,10 @@ posts (open the file on GitHub to see them move).
 | space | magic | coffee | robot |
 | --- | --- | --- | --- |
 | ![space](gifs/space/planet.gif) | ![magic](gifs/magic/wand.gif) | ![coffee](gifs/coffee/mug.gif) | ![robot](gifs/robot/wave.gif) |
+
+| comic | sunny | game | sticker | yeah |
+| --- | --- | --- | --- | --- |
+| ![comic](gifs/comic/burst.gif) | ![sunny](gifs/sunny/sun.gif) | ![game](gifs/game/levelup.gif) | ![sticker](gifs/sticker/star.gif) | ![yeah](gifs/yeah/pump.gif) |
 
 The in-the-wild demo is the next merged pull request on this
 repository: [.github/workflows/celebrate.yml](.github/workflows/celebrate.yml)
@@ -105,6 +109,11 @@ file in the group (stable for a given pull request number).
 | `magic` | `magic`, `sparkle`, `wand`, `spell` | ![magic](gifs/magic/wand.gif) |
 | `coffee` | `coffee`, `latte`, `caffeine`, `espresso` | ![coffee](gifs/coffee/mug.gif) |
 | `robot` | `robot`, `android` | ![robot](gifs/robot/wave.gif) |
+| `comic` | `comic`, `kapow` | ![comic](gifs/comic/burst.gif) |
+| `sunny` | `sunny`, `sunshine`, `sunbeam` | ![sunny](gifs/sunny/sun.gif) |
+| `game` | `level-up`, `level up`, `combo`, `high score` | ![game](gifs/game/levelup.gif) |
+| `sticker` | `sticker` | ![sticker](gifs/sticker/star.gif) |
+| `yeah` | `yeah`, `let's go`, `fist pump` | ![yeah](gifs/yeah/pump.gif) |
 
 `welcome` also wins on `auto` when GitHub marks the author
 `FIRST_TIME_CONTRIBUTOR` or `FIRST_TIMER` and the title did not match
@@ -116,7 +125,9 @@ win before mood keywords, so `feat: add party mode` still ships.
 Aliases: `launch` → `ship`, `nailed-it` → `fix`, `nice-work` → `docs`,
 `ci` / `high-five` → `tests`, `refactor` → `cleanup`, `first` → `welcome`,
 `congrats` / `woo` → `party`, `cosmos` / `galaxy` → `space`,
-`sparkle` → `magic`, `latte` → `coffee`, `bot` → `robot`.
+`sparkle` → `magic`, `latte` → `coffee`, `bot` → `robot`,
+`kapow` → `comic`, `sunshine` → `sunny`, `level-up` / `combo` → `game`,
+`stickers` → `sticker`, `lets-go` / `fist-pump` → `yeah`.
 
 ## Inputs
 
@@ -186,8 +197,8 @@ python3 scripts/make_gifs.py
 
 Writes `gifs/<group>/<name>.gif`. Keep each file under 180 KB. A group
 may hold several files; `alt.gif` is the same still with the pulse
-inverted. Mood groups (`party`, `space`, `magic`, `coffee`, `robot`)
-each ship two original stills.
+inverted. Mood groups (`party`, `space`, `magic`, `coffee`, `robot`, `comic`,
+`sunny`, `game`, `sticker`, `yeah`) each ship two original stills.
 
 ## License
 
