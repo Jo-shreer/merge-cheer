@@ -8,5 +8,34 @@ secrets. The Action therefore:
 - reads the title from an environment variable
 - only posts a comment
 
-Report a vulnerability in a public GitHub issue on the Action
-repository. Do not paste live tokens.
+## Reporting a vulnerability
+
+Open a **public** GitHub issue on this repo. Label it `security` if you can.
+
+Include:
+
+- what the issue is and where in the code it lives
+- how to reproduce it
+- what an attacker could do with it
+
+Do **not** paste live API keys, tokens, or `.env` contents into the issue.
+Redact secrets and describe them instead.
+
+## Scope
+
+In scope:
+
+- checking out pull request head from `pull_request_target`
+- interpolating `PR_TITLE` into a shell
+- secrets committed to the repository
+- a comment that does more than post Markdown
+
+Out of scope (a normal issue is fine):
+
+- Giphy returning a dull GIF when a key is set
+- a title keyword mapping you disagree with
+
+## Data safety
+
+- Never commit `.env` or tokens
+- Never paste a real API key into an issue, even as a "repro"

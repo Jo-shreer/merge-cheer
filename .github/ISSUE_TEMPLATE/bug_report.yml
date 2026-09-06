@@ -1,0 +1,56 @@
+name: Bug report
+description: The Action missed a merge, posted the wrong group, or failed
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Do not paste real API keys or tokens.**
+        If this is a security vulnerability, use the Security vulnerability
+        contact link. Do not paste live keys.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. python3 -m unittest discover -s tests -q
+        2. Merge a PR titled "fix: leak"
+        3. See the comment
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface?
+      options:
+        - Topic / title keywords
+        - Bundled GIF
+        - Optional Giphy fallback
+        - Comment text
+        - Docs / CI
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow YAML
+      description: Redact tokens and secrets. A `uses:` snippet is enough.
+      render: yaml
+  - type: input
+    id: python
+    attributes:
+      label: Python version (local repro only)
+      placeholder: "3.13.2"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Redact any keys, tokens, or user identifiers.
+      render: shell

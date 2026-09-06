@@ -5,34 +5,180 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
-TAGS = (
-    "nailed it",
-    "ship it",
-    "nice work",
-    "high five",
+# Public group names. Users pass these as `topic`.
+GROUPS = (
+    "ship",
+    "fix",
+    "docs",
+    "tests",
     "cleanup",
     "celebration",
+    "welcome",
+    "party",
+    "space",
+    "magic",
+    "coffee",
+    "robot",
+)
+
+# Extra spellings that resolve to a group. `auto` is handled separately.
+ALIASES = {
+    "ship": "ship",
+    "launch": "ship",
+    "ship-it": "ship",
+    "ship it": "ship",
+    "fix": "fix",
+    "nailed-it": "fix",
+    "nailed it": "fix",
+    "docs": "docs",
+    "doc": "docs",
+    "nice-work": "docs",
+    "nice work": "docs",
+    "tests": "tests",
+    "test": "tests",
+    "ci": "tests",
+    "high-five": "tests",
+    "high five": "tests",
+    "cleanup": "cleanup",
+    "refactor": "cleanup",
+    "clean": "cleanup",
+    "celebration": "celebration",
+    "welcome": "welcome",
+    "first": "welcome",
+    "first-contribution": "welcome",
+    "party": "party",
+    "congrats": "party",
+    "woo": "party",
+    "hooray": "party",
+    "space": "space",
+    "cosmos": "space",
+    "galaxy": "space",
+    "magic": "magic",
+    "sparkle": "magic",
+    "coffee": "coffee",
+    "latte": "coffee",
+    "robot": "robot",
+    "bot": "robot",
+}
+
+# Giphy search text when a key is set.
+GIPHY_TAG = {
+    "ship": "ship it",
+    "fix": "nailed it",
+    "docs": "nice work",
+    "tests": "high five",
+    "cleanup": "cleanup",
+    "celebration": "celebration",
+    "welcome": "high five",
+    "party": "celebration",
+    "space": "stars",
+    "magic": "magic",
+    "coffee": "coffee",
+    "robot": "robot",
+}
+
+# Alt text for the posted image.
+LABEL = {
+    "ship": "ship it",
+    "fix": "nailed it",
+    "docs": "nice work",
+    "tests": "high five",
+    "cleanup": "cleanup",
+    "celebration": "celebration",
+    "welcome": "welcome",
+    "party": "party",
+    "space": "space",
+    "magic": "magic",
+    "coffee": "coffee",
+    "robot": "robot",
+}
+
+FIRST_TIMERS = frozenset({"FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"})
+
+# Title keywords, first match wins. Conventional types stay above mood
+# groups so "feat" / "fix" are not stolen. Keep "ship" and "space" off
+# bare substrings ("fellowship", "namespace").
+_TITLE_RULES = (
+    ("fix", ("fix", "bug", "hotfix", "patch")),
+    ("ship", ("feat", "add ", "added", "new ", "launch", "ship:", "ship ")),
+    ("docs", ("doc", "readme")),
+    ("tests", ("test", "ci")),
+    ("cleanup", ("refactor", "clean")),
+    ("welcome", ("welcome", "first contrib", "good first", "first-time")),
+    ("party", ("party", "congrats", "woo", "hooray", "celebrate")),
+    ("space", ("cosmos", "galaxy", "orbit", "planet", "outer space")),
+    ("magic", ("magic", "sparkle", "wand", "spell")),
+    ("coffee", ("coffee", "latte", "caffeine", "espresso")),
+    ("robot", ("robot", "android")),
 )
 
 
-def pick_tag(title: str) -> str:
+def allowed_topics() -> str:
+    return ", ".join(("auto",) + GROUPS)
+
+
+def normalize_topic(value: str) -> str:
+    raw = (value or "auto").strip().lower().replace("_", "-")
+    if raw in ("", "auto"):
+        return "auto"
+    return ALIASES.get(raw, "")
+
+
+def pick_from_title(title: str, association: str = "") -> str:
     low = title.lower()
-    if any(word in low for word in ("fix", "bug", "hotfix", "patch")):
-        return "nailed it"
-    if any(word in low for word in ("feat", "add ", "added", "new ")):
-        return "ship it"
-    if any(word in low for word in ("doc", "readme")):
-        return "nice work"
-    if any(word in low for word in ("test", "ci")):
-        return "high five"
-    if any(word in low for word in ("refactor", "clean")):
-        return "cleanup"
+    for group, words in _TITLE_RULES:
+        if any(word in low for word in words):
+            return group
+    if association.upper() in FIRST_TIMERS:
+        return "welcome"
     return "celebration"
+
+
+def resolve_group(title: str, topic: str, association: str = "") -> str:
+    """Pick a group. Unknown explicit topics fall back to celebration."""
+    chosen = normalize_topic(topic)
+    if chosen == "auto":
+        return pick_from_title(title, association)
+    if not chosen:
+        print(
+            f"unknown topic {topic!r}; allowed: {allowed_topics()}",
+            file=sys.stderr,
+        )
+        return "celebration"
+    return chosen
+
+
+def action_root() -> Path:
+    override = os.environ.get("ACTION_PATH", "").strip()
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[1]
+
+
+def group_gif_names(root: Path, group: str) -> list[str]:
+    folder = root / "gifs" / group
+    return [path.name for path in sorted(folder.glob("*.gif"))]
+
+
+def pick_gif_name(names: list[str], seed: str) -> str:
+    if not names:
+        return ""
+    return names[random.Random(seed).randrange(len(names))]
+
+
+def choose_gif(root: Path, group: str, seed: str) -> tuple[str, str]:
+    names = group_gif_names(root, group)
+    if not names and group != "celebration":
+        group = "celebration"
+        names = group_gif_names(root, group)
+    return group, pick_gif_name(names, f"{seed}:{group}")
 
 
 def slug(tag: str) -> str:
@@ -47,10 +193,12 @@ def normalize_ref(ref: str) -> str:
     return value
 
 
-def bundled_url(action_repo: str, action_ref: str, tag: str) -> str:
+def bundled_url(action_repo: str, action_ref: str, group: str, name: str) -> str:
+    if not name:
+        return ""
     return (
         f"https://raw.githubusercontent.com/{action_repo}/"
-        f"{normalize_ref(action_ref)}/gifs/{slug(tag)}.gif"
+        f"{normalize_ref(action_ref)}/gifs/{group}/{name}"
     )
 
 
@@ -116,23 +264,34 @@ def write_output(path: str, values: dict[str, str]) -> None:
 
 def main() -> int:
     title = os.environ.get("PR_TITLE", "")
-    tag = pick_tag(title)
+    topic = os.environ.get("TOPIC", "auto")
+    association = os.environ.get("PR_AUTHOR_ASSOCIATION", "")
+    group = resolve_group(title, topic, association)
+    root = action_root()
+    group, name = choose_gif(root, group, os.environ.get("PR_NUMBER", ""))
     gif = giphy_url(
         os.environ.get("GIPHY_API_KEY", "").strip(),
-        tag,
+        GIPHY_TAG[group],
         os.environ.get("GIPHY_RATING", "g").strip() or "g",
     )
     if not gif:
         gif = bundled_url(
             os.environ.get("ACTION_REPO", "").strip(),
             os.environ.get("ACTION_REF", "main"),
-            tag,
+            group,
+            name,
         )
     author = os.environ.get("PR_AUTHOR", "").strip()
-    body = comment_body(os.environ.get("MESSAGE", ""), author, tag, gif)
+    label = LABEL[group]
+    body = comment_body(os.environ.get("MESSAGE", ""), author, label, gif)
     write_output(
         os.environ.get("GITHUB_OUTPUT", ""),
-        {"url": gif, "tag": tag, "body": body.replace("\n", "%0A")},
+        {
+            "url": gif,
+            "tag": label,
+            "group": group,
+            "body": body.replace("\n", "%0A"),
+        },
     )
     if os.environ.get("DRY_RUN") == "1":
         print(body)

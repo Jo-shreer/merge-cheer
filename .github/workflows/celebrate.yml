@@ -1,8 +1,8 @@
 name: Celebrate merge
 
-# Dogfood the Action on this repository. Checkout is the default
-# branch only — never the pull request head — so `uses: ./` can
-# load action.yml after a fork merge.
+# Live demo in the wild: comment a GIF on the next merge here.
+# Checkout is the default branch only — never the pull request
+# head — so `uses: ./` can load action.yml after a fork merge.
 on:
   pull_request_target:
     types: [closed]

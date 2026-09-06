@@ -9,6 +9,13 @@ inputs:
   github-token:
     description: Token used to comment on the pull request.
     default: ${{ github.token }}
+  topic:
+    description: >
+      GIF group. auto (default) picks from the PR title.
+      Groups: ship, fix, docs, tests, cleanup, celebration, welcome,
+      party, space, magic, coffee, robot.
+    required: false
+    default: "auto"
   giphy-api-key:
     description: Optional Giphy key. When unset, the bundled GIFs are used.
     required: false
@@ -30,10 +37,13 @@ runs:
         GIPHY_API_KEY: ${{ inputs.giphy-api-key }}
         GIPHY_RATING: ${{ inputs.rating }}
         MESSAGE: ${{ inputs.message }}
+        TOPIC: ${{ inputs.topic }}
         PR_TITLE: ${{ github.event.pull_request.title }}
         PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        PR_AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         ACTION_REPO: ${{ github.action_repository }}
         ACTION_REF: ${{ github.action_ref }}
+        ACTION_PATH: ${{ github.action_path }}
       run: python3 "${{ github.action_path }}/src/celebrate.py"
