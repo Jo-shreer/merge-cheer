@@ -83,14 +83,7 @@ jobs:
             exit 1
           fi
 
-          PIPE_NS="$(python3 <<'PY'
-import re
-from pathlib import Path
-text = Path("pipe.yml").read_text()
-m = re.search(r"^image:\s*([^/:\s]+)/", text, re.M)
-print(m.group(1) if m else "")
-PY
-)"
+          PIPE_NS="$(sed -n 's/^image:[[:space:]]*\([^/:[:space:]]*\)\/.*/\1/p' pipe.yml | head -n1)"
           echo "username_len=${#USER} token_len=${#TOKEN} token_kind=${KIND} pipe_namespace=${PIPE_NS:-unknown}"
           if [ -n "${PIPE_NS:-}" ] && [ "$USER" != "$PIPE_NS" ]; then
             echo "::error::DOCKERHUB_USERNAME does not match pipe.yml image namespace (${PIPE_NS})."
