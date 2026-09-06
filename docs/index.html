@@ -139,10 +139,24 @@
       <figure><img src="gifs/game/levelup.gif" alt="game GIF"><figcaption>game</figcaption></figure>
       <figure><img src="gifs/sticker/star.gif" alt="sticker GIF"><figcaption>sticker</figcaption></figure>
     </div>
-    <p class="mute">Also on the Action: ship, fix, docs, tests, cleanup, celebration, welcome, party, space, magic, coffee, robot, yeah. <code>topic: title</code> is the old picker (it reads the PR title).</p>
+    <p>IT-section themes, same Action. Pin <code>topic: python</code> or <code>topic: devops</code> when the repo has a home.</p>
+    <div class="demo">
+      <figure><img src="gifs/devops/loop.gif" alt="devops GIF"><figcaption>devops</figcaption></figure>
+      <figure><img src="gifs/python/snake.gif" alt="python GIF"><figcaption>python</figcaption></figure>
+      <figure><img src="gifs/frontend/browser.gif" alt="frontend GIF"><figcaption>frontend</figcaption></figure>
+      <figure><img src="gifs/golang/gopher.gif" alt="golang GIF"><figcaption>golang</figcaption></figure>
+    </div>
+    <p class="mute">Also on the Action: ship, fix, docs, tests, cleanup, celebration, welcome, party, space, magic, coffee, robot, yeah, sre, qa, design, architecture, engineering, backend, java, cpp. <code>topic: title</code> is the old picker (it reads the PR title).</p>
 
-    <h2>Install</h2>
-    <p>Default is <code>topic: auto</code> — a random shipped theme, then one GIF in that group.</p>
+    <h2 id="install">Install</h2>
+    <p>Default is <code>topic: auto</code> — a random shipped theme, then one GIF in that group. Pin <code>@v1.3.0</code> (current release).</p>
+
+    <h3>GitHub</h3>
+    <ol class="steps">
+      <li>Add the workflow below on the <strong>default</strong> branch.</li>
+      <li>Keep <code>pull_request_target</code> and <code>pull-requests: write</code> so a fork merge can get a comment.</li>
+      <li>Merge a human pull request. github-actions comments one GIF. Bots are skipped.</li>
+    </ol>
     <pre>name: Celebrate merge
 on:
   pull_request_target:
@@ -158,8 +172,34 @@ jobs:
     <p>Pin a theme when you want the same mood on every merge:</p>
     <pre>- uses: YauhenBichel/merge-cheer@v1.3.0
   with:
-    topic: comic   # or sunny, game, sticker, yeah, ship, …</pre>
-    <p class="mute">Pin <code>@v1.3.0</code> (current release). <code>@v1</code> is the older first release, not a floating major. An unknown <code>topic</code> falls back to <code>celebration</code>.</p>
+    topic: comic   # or python, devops, sunny, game, …</pre>
+    <p class="mute"><code>@v1</code> is the older first release, not a floating major. An unknown <code>topic</code> falls back to <code>celebration</code>.</p>
+
+    <h3 id="gitlab">GitLab</h3>
+    <ol class="steps">
+      <li>Copy <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/examples/gitlab-ci.yml">examples/gitlab-ci.yml</a> onto the default branch, or include the Catalog component after you publish one.</li>
+      <li>Add a project access token <code>GITLAB_TOKEN</code> with <code>api</code> scope. <code>CI_JOB_TOKEN</code> cannot post notes.</li>
+      <li>Merge into the default branch. The job finds that merge request and comments the GIF.</li>
+    </ol>
+    <pre>include:
+  - component: $CI_SERVER_FQDN/yauhenbichel/merge-cheer/merge-cheer@v1.3.0
+    inputs:
+      topic: auto
+      token: $GITLAB_TOKEN</pre>
+    <p class="mute">How to get a <a href="https://gitlab.com/explore/catalog">CI/CD Catalog</a> row: <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/MARKETPLACES.md">MARKETPLACES.md</a>.</p>
+
+    <h3 id="bitbucket">Bitbucket</h3>
+    <ol class="steps">
+      <li>Copy <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/examples/bitbucket-pipelines.yml">examples/bitbucket-pipelines.yml</a> onto <code>main</code>.</li>
+      <li>Add a secured repository variable <code>BITBUCKET_ACCESS_TOKEN</code> with pullrequest write.</li>
+      <li>Merge a pull request. The step comments the GIF.</li>
+    </ol>
+    <pre>script:
+  - pipe: docker://yauhenbichel/merge-cheer:1.3.0
+    variables:
+      TOPIC: auto
+      BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN</pre>
+    <p class="mute">Until the Docker image is public, use the curl job in the example. A <a href="https://support.atlassian.com/bitbucket-cloud/docs/what-are-pipes/">Pipes</a> UI listing needs an Atlassian review — same <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/MARKETPLACES.md">MARKETPLACES.md</a>.</p>
 
     <h2>Used by</h2>
     <p>8 public repositories already run Merge Cheer on the default branch, pinned to <code>@v1.3.0</code>.</p>

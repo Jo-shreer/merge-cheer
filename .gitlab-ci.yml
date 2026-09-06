@@ -1,0 +1,32 @@
+# Catalog project pipeline. Mirror this repo to GitLab.com, turn on
+# Settings → General → CI/CD Catalog, then tag a semver release.
+# The `release` keyword (not the Releases API) is what publishes a version.
+
+stages: [test, release]
+
+test:
+  stage: test
+  image: python:3.13-alpine
+  script:
+    - python3 -m unittest discover -s tests -q
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+create-release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
+  script:
+    - echo "Release ${CI_COMMIT_TAG}"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: "Merge Cheer ${CI_COMMIT_TAG}"
+    assets:
+      links:
+        - name: GitHub Action
+          url: https://github.com/YauhenBichel/merge-cheer
+        - name: Live demo
+          url: https://yauhenbichel.github.io/merge-cheer/

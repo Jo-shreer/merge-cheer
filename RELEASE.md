@@ -55,3 +55,7 @@ browser step. Later reviewed Releases update the existing listing if
 it is already published.
 
 Do not add a Marketplace badge until that listing is live.
+
+GitLab Catalog and Bitbucket Pipes are separate listings. Mirror,
+release, and review steps are in [MARKETPLACES.md](MARKETPLACES.md).
+Do not claim those rows exist until their catalog URLs return 200.

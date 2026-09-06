@@ -22,6 +22,17 @@ file as the [site demo](https://yauhenbichel.github.io/merge-cheer/#demo).
 
 ## Install
 
+Pin `@v1.3.0` (current release). `@v1` is the older first release.
+The Action never checks out the pull request head.
+
+### GitHub
+
+1. Add [.github/workflows/celebrate-merge.yml](examples/celebrate-merge.yml)
+   on the **default** branch (this file is enough).
+2. `pull_request_target` + `pull-requests: write` is what lets a fork
+   merge get a comment. Bots are skipped.
+3. Merge a human pull request. github-actions comments one GIF.
+
 ```yaml
 name: Celebrate merge
 on:
@@ -37,10 +48,46 @@ jobs:
       - uses: YauhenBichel/merge-cheer@v1.3.0
 ```
 
-Pin `@v1.3.0` (current release). `@v1` is the older first release.
+### GitLab
 
-`pull_request_target` is what lets a fork merge get a comment. The action
-never checks out the pull request head.
+1. Copy [examples/gitlab-ci.yml](examples/gitlab-ci.yml) onto the default
+   branch, or include the Catalog component after you publish one
+   ([MARKETPLACES.md](MARKETPLACES.md)).
+2. Add a project access token `GITLAB_TOKEN` with `api` scope.
+   `CI_JOB_TOKEN` cannot post merge-request notes.
+3. Push a merge to the default branch. The job finds that merged MR and
+   comments the GIF.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/yauhenbichel/merge-cheer/merge-cheer@v1.3.0
+    inputs:
+      topic: auto
+      token: $GITLAB_TOKEN
+```
+
+Until the Catalog row exists, the curl job in
+`examples/gitlab-ci.yml` is the working path.
+
+### Bitbucket
+
+1. Copy [examples/bitbucket-pipelines.yml](examples/bitbucket-pipelines.yml)
+   onto `main` (or `master`).
+2. Add a secured repository variable `BITBUCKET_ACCESS_TOKEN` with
+   pullrequest write.
+3. Merge a pull request into that branch. The step comments the GIF.
+
+```yaml
+script:
+  - pipe: docker://yauhenbichel/merge-cheer:1.3.0
+    variables:
+      TOPIC: auto
+      BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN
+```
+
+Until `yauhenbichel/merge-cheer:1.3.0` is on Docker Hub, use the curl
+job in the example. A Pipes UI listing needs an Atlassian review —
+[MARKETPLACES.md](MARKETPLACES.md).
 
 Pin a group:
 
@@ -54,7 +101,9 @@ Pin a group:
 that group. Different PR numbers can land on different groups. Allowed
 names: `auto`, `title`, `ship`, `fix`, `docs`, `tests`, `cleanup`,
 `celebration`, `welcome`, `party`, `space`, `magic`, `coffee`, `robot`,
-`comic`, `sunny`, `game`, `sticker`, `yeah`. An unknown name falls back
+`comic`, `sunny`, `game`, `sticker`, `yeah`, `devops`, `sre`, `qa`,
+`design`, `architecture`, `engineering`, `backend`, `frontend`, `java`,
+`python`, `cpp`, `golang`. An unknown name falls back
 to `celebration` and prints the list.
 
 ## Live demo
@@ -100,6 +149,18 @@ see it move).
 | --- | --- | --- | --- | --- |
 | ![comic](gifs/comic/burst.gif) | ![sunny](gifs/sunny/sun.gif) | ![game](gifs/game/levelup.gif) | ![sticker](gifs/sticker/star.gif) | ![yeah](gifs/yeah/pump.gif) |
 
+| devops | sre | qa | design |
+| --- | --- | --- | --- |
+| ![devops](gifs/devops/loop.gif) | ![sre](gifs/sre/lighthouse.gif) | ![qa](gifs/qa/pass.gif) | ![design](gifs/design/palette.gif) |
+
+| architecture | engineering | backend | frontend |
+| --- | --- | --- | --- |
+| ![architecture](gifs/architecture/blocks.gif) | ![engineering](gifs/engineering/wrench.gif) | ![backend](gifs/backend/db.gif) | ![frontend](gifs/frontend/browser.gif) |
+
+| java | python | cpp | golang |
+| --- | --- | --- | --- |
+| ![java](gifs/java/mug.gif) | ![python](gifs/python/snake.gif) | ![cpp](gifs/cpp/plus.gif) | ![golang](gifs/golang/gopher.gif) |
+
 The in-the-wild demo is the next merged pull request on this
 repository: [.github/workflows/celebrate.yml](.github/workflows/celebrate.yml)
 runs `uses: ./` and comments one of these GIFs. No merge comment exists
@@ -144,6 +205,18 @@ file in the group (stable for a given pull request number).
 | `game` | `level-up`, `level up`, `combo`, `high score` | ![game](gifs/game/levelup.gif) |
 | `sticker` | `sticker` | ![sticker](gifs/sticker/star.gif) |
 | `yeah` | `yeah`, `let's go`, `fist pump` | ![yeah](gifs/yeah/pump.gif) |
+| `devops` | `devops`, `kubernetes`, `k8s`, `docker` | ![devops](gifs/devops/loop.gif) |
+| `sre` | `sre`, `on-call`, `slo` | ![sre](gifs/sre/lighthouse.gif) |
+| `qa` | `qa`, `sdet`, `quality` | ![qa](gifs/qa/pass.gif) |
+| `design` | `design`, `figma`, `ux` | ![design](gifs/design/palette.gif) |
+| `architecture` | `architecture`, `adr` | ![architecture](gifs/architecture/blocks.gif) |
+| `engineering` | `software engineering`, `swe` | ![engineering](gifs/engineering/wrench.gif) |
+| `backend` | `backend`, `graphql` | ![backend](gifs/backend/db.gif) |
+| `frontend` | `frontend`, `javascript`, `react` | ![frontend](gifs/frontend/browser.gif) |
+| `java` | `java:`, `jdk`, `jvm` | ![java](gifs/java/mug.gif) |
+| `python` | `python`, `django`, `flask` | ![python](gifs/python/snake.gif) |
+| `cpp` | `c++`, `cpp` | ![cpp](gifs/cpp/plus.gif) |
+| `golang` | `golang`, `gopher` | ![golang](gifs/golang/gopher.gif) |
 
 `welcome` also wins on `topic: title` when GitHub marks the author
 `FIRST_TIME_CONTRIBUTOR` or `FIRST_TIMER` and the title did not match
@@ -157,7 +230,14 @@ Aliases: `launch` → `ship`, `nailed-it` → `fix`, `nice-work` → `docs`,
 `congrats` / `woo` → `party`, `cosmos` / `galaxy` → `space`,
 `sparkle` → `magic`, `latte` → `coffee`, `bot` → `robot`,
 `kapow` → `comic`, `sunshine` → `sunny`, `level-up` / `combo` → `game`,
-`stickers` → `sticker`, `lets-go` / `fist-pump` → `yeah`.
+`stickers` → `sticker`, `lets-go` / `fist-pump` → `yeah`,
+`k8s` / `docker` → `devops`, `on-call` → `sre`, `testing` / `sdet` → `qa`,
+`ux` / `figma` → `design`, `arch` → `architecture`, `swe` → `engineering`,
+`js` / `react` → `frontend`, `jdk` → `java`, `py` → `python`,
+`c++` → `cpp`, `go` / `gopher` → `golang`.
+
+`javascript` does not match `java`. Conventional `test` / `ci` still win
+before `qa`. `feat: add python client` still ships.
 
 ## Inputs
 

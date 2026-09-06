@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import os
 import unittest
 from contextlib import redirect_stderr
 from pathlib import Path
@@ -47,6 +48,18 @@ class CelebrateTest(unittest.TestCase):
             "game",
             "sticker",
             "yeah",
+            "devops",
+            "sre",
+            "qa",
+            "design",
+            "architecture",
+            "engineering",
+            "backend",
+            "frontend",
+            "java",
+            "python",
+            "cpp",
+            "golang",
         ):
             names = list((GIFS / group).glob("*.gif"))
             self.assertGreaterEqual(len(names), 2, group)
@@ -103,6 +116,29 @@ class CelebrateTest(unittest.TestCase):
             "sticker-thumb",
             "yeah-pump",
             "yeah-jump",
+            "devops-loop",
+            "devops-pipeline",
+            "sre-lighthouse",
+            "sre-pager",
+            "qa-lens",
+            "qa-pass",
+            "design-palette",
+            "design-frames",
+            "architecture-blocks",
+            "architecture-blueprint",
+            "engineering-wrench",
+            "engineering-build",
+            "backend-db",
+            "backend-server",
+            "frontend-browser",
+            "frontend-cursor",
+            "java-mug",
+            "python-snake",
+            "python-coil",
+            "cpp-plus",
+            "cpp-gear",
+            "golang-gopher",
+            "golang-wave",
         ):
             self.assertTrue((STILLS / f"{name}.png").is_file(), name)
 
@@ -127,6 +163,18 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.pick_from_title("chore: level-up combo"), "game")
         self.assertEqual(celebrate.pick_from_title("chore: sticker pack"), "sticker")
         self.assertEqual(celebrate.pick_from_title("chore: yeah let's go"), "yeah")
+        self.assertEqual(celebrate.pick_from_title("chore: kubernetes helm"), "devops")
+        self.assertEqual(celebrate.pick_from_title("chore: on-call slo"), "sre")
+        self.assertEqual(celebrate.pick_from_title("chore: qa sdet"), "qa")
+        self.assertEqual(celebrate.pick_from_title("chore: figma mockup"), "design")
+        self.assertEqual(celebrate.pick_from_title("chore: architecture adr"), "architecture")
+        self.assertEqual(celebrate.pick_from_title("chore: swe: helper"), "engineering")
+        self.assertEqual(celebrate.pick_from_title("chore: backend graphql"), "backend")
+        self.assertEqual(celebrate.pick_from_title("chore: javascript react"), "frontend")
+        self.assertEqual(celebrate.pick_from_title("chore: python django"), "python")
+        self.assertEqual(celebrate.pick_from_title("chore: cpp: move"), "cpp")
+        self.assertEqual(celebrate.pick_from_title("chore: golang gopher"), "golang")
+        self.assertEqual(celebrate.pick_from_title("chore: java: streams"), "java")
 
     def test_mood_keywords_do_not_steal_conventional_types(self) -> None:
         celebrate = _load()
@@ -141,6 +189,10 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.pick_from_title("refactor: yeah helper"), "cleanup")
         self.assertEqual(celebrate.pick_from_title("chore: power"), "celebration")
         self.assertEqual(celebrate.pick_from_title("chore: game night"), "celebration")
+        self.assertEqual(celebrate.pick_from_title("feat: add python client"), "ship")
+        self.assertEqual(celebrate.pick_from_title("fix: java null"), "fix")
+        self.assertEqual(celebrate.pick_from_title("test: frontend grid"), "tests")
+        self.assertEqual(celebrate.pick_from_title("docs: devops runbook"), "docs")
 
     def test_first_timer_generic_title_is_welcome(self) -> None:
         celebrate = _load()
@@ -198,6 +250,13 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.resolve_group("chore: bump", "sticker"), "sticker")
         self.assertEqual(celebrate.resolve_group("chore: bump", "yeah"), "yeah")
         self.assertEqual(celebrate.resolve_group("chore: bump", "lets-go"), "yeah")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "devops"), "devops")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "k8s"), "devops")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "testing"), "qa")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "python"), "python")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "go"), "golang")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "c++"), "cpp")
+        self.assertEqual(celebrate.resolve_group("chore: bump", "javascript"), "frontend")
 
     def test_unknown_topic_falls_back_to_celebration(self) -> None:
         celebrate = _load()
@@ -289,6 +348,9 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("gifs/game/levelup.gif", text)
         self.assertIn("gifs/sticker/star.gif", text)
         self.assertIn("gifs/yeah/pump.gif", text)
+        self.assertIn("gifs/devops/loop.gif", text)
+        self.assertIn("gifs/python/snake.gif", text)
+        self.assertIn("gifs/golang/gopher.gif", text)
         self.assertIn("![Merge Cheer demo](docs/merge-cheer-demo.mp4)", text)
         self.assertIn("**What.**", text)
         self.assertIn("**Why.**", text)
@@ -331,6 +393,11 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("gifs/sunny/sun.gif", html)
         self.assertIn("gifs/game/levelup.gif", html)
         self.assertIn("gifs/sticker/star.gif", html)
+        self.assertIn("gifs/devops/loop.gif", html)
+        self.assertIn("gifs/python/snake.gif", html)
+        self.assertIn("gifs/frontend/browser.gif", html)
+        self.assertIn("gifs/golang/gopher.gif", html)
+        self.assertIn("topic: python", html)
         self.assertIn("cp docs/merge-cheer-demo.mp4 _site/merge-cheer-demo.mp4", pages)
         self.assertTrue((ROOT / "docs" / "merge-cheer-demo.mp4").is_file())
         self.assertTrue((ROOT / "docs" / "merge-cheer-demo-poster.png").is_file())
@@ -342,10 +409,30 @@ class CelebrateTest(unittest.TestCase):
         self.assertNotIn("marketplace/actions", html)
         self.assertNotIn("<script", html)
         self.assertIn("https://yauhenbichel.github.io/merge-cheer/", readme)
+        self.assertIn("GitLab", html)
+        self.assertIn("Bitbucket", html)
+        self.assertIn("MARKETPLACES.md", html)
+        self.assertIn("examples/gitlab-ci.yml", readme)
+        self.assertIn("examples/bitbucket-pipelines.yml", readme)
+        self.assertIn("### GitHub", readme)
+        self.assertIn("### GitLab", readme)
+        self.assertIn("### Bitbucket", readme)
+        self.assertIn("GITLAB_TOKEN", html)
+        self.assertIn("BITBUCKET_ACCESS_TOKEN", html)
+        self.assertIn("id=\"gitlab\"", html)
+        self.assertIn("id=\"bitbucket\"", html)
         self.assertIn("actions/deploy-pages", pages)
         self.assertIn("cp -R gifs _site/gifs", pages)
         medium = (ROOT / "docs" / "medium-merge-cheer.md").read_text(encoding="utf-8")
         self.assertIn("https://yauhenbichel.github.io/merge-cheer/", medium)
+        self.assertIn(
+            "https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo.mp4",
+            medium,
+        )
+        self.assertIn(
+            "https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo-poster.png",
+            medium,
+        )
         self.assertIn(
             "https://yauhenbichel.github.io/merge-cheer/gifs/comic/pop.gif",
             medium,
@@ -424,6 +511,73 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("exit 0", text)
         self.assertIn("exit 1", text)
         self.assertNotIn("git push\n", text)
+
+    def test_bundled_gif_names_match_the_repo(self) -> None:
+        celebrate = _load()
+        for group, names in celebrate.BUNDLED_GIFS.items():
+            on_disk = {path.name for path in (GIFS / group).glob("*.gif")}
+            self.assertEqual(set(names), on_disk, group)
+        self.assertEqual(set(celebrate.BUNDLED_GIFS), set(celebrate.GROUPS))
+
+    def test_gif_names_work_without_a_local_tree(self) -> None:
+        celebrate = _load()
+        names = celebrate.group_gif_names(ROOT / "does-not-exist", "python")
+        self.assertIn("snake.gif", names)
+
+    def test_detect_host(self) -> None:
+        celebrate = _load()
+        saved = {
+            key: os.environ.pop(key, None)
+            for key in (
+                "GITHUB_ACTIONS",
+                "GITLAB_CI",
+                "BITBUCKET_COMMIT",
+                "BITBUCKET_REPO_FULL_NAME",
+            )
+        }
+        try:
+            os.environ["GITHUB_ACTIONS"] = "true"
+            self.assertEqual(celebrate.detect_host(), "github")
+            del os.environ["GITHUB_ACTIONS"]
+            os.environ["GITLAB_CI"] = "true"
+            self.assertEqual(celebrate.detect_host(), "gitlab")
+            del os.environ["GITLAB_CI"]
+            os.environ["BITBUCKET_COMMIT"] = "abc"
+            self.assertEqual(celebrate.detect_host(), "bitbucket")
+        finally:
+            for key, value in saved.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+        self.assertTrue(celebrate.is_bot_author("dependabot[bot]"))
+        self.assertFalse(celebrate.is_bot_author("alice"))
+
+    def test_gitlab_and_bitbucket_adapters_are_shipped(self) -> None:
+        component = (ROOT / "templates" / "merge-cheer.yml").read_text(encoding="utf-8")
+        gitlab_ci = (ROOT / ".gitlab-ci.yml").read_text(encoding="utf-8")
+        pipe = (ROOT / "pipe.yml").read_text(encoding="utf-8")
+        dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
+        markets = (ROOT / "MARKETPLACES.md").read_text(encoding="utf-8")
+        example_gl = (ROOT / "examples" / "gitlab-ci.yml").read_text(encoding="utf-8")
+        example_bb = (ROOT / "examples" / "bitbucket-pipelines.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("spec:", component)
+        self.assertIn("inputs:", component)
+        self.assertIn("celebrate.py", component)
+        self.assertIn("release:", gitlab_ci)
+        self.assertIn("python3 -m unittest discover -s tests -q", gitlab_ci)
+        self.assertIn("yauhenbichel/merge-cheer:1.3.0", pipe)
+        self.assertIn("BITBUCKET_ACCESS_TOKEN", pipe)
+        self.assertIn("src/celebrate.py", dockerfile)
+        self.assertIn("CI/CD Catalog", markets)
+        self.assertIn("official-pipes", markets)
+        self.assertNotIn("/Users/", markets)
+        self.assertNotIn("DevBox/", markets)
+        self.assertIn("celebrate.py", example_gl)
+        self.assertIn("BITBUCKET_ACCESS_TOKEN", example_bb)
+        self.assertIn("GITLAB_TOKEN", (ROOT / "README.md").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

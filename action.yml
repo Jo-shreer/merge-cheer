@@ -16,7 +16,8 @@ inputs:
       name to pin that mood. title picks from the PR title.
       Groups: ship, fix, docs, tests, cleanup, celebration, welcome,
       party, space, magic, coffee, robot, comic, sunny, game, sticker,
-      yeah.
+      yeah, devops, sre, qa, design, architecture, engineering,
+      backend, frontend, java, python, cpp, golang.
     required: false
     default: "auto"
   giphy-api-key:

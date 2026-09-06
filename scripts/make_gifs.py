@@ -4,8 +4,8 @@
 Layout is gifs/<group>/<name>.gif. A group may hold several files; the
 Action picks one. Motion is a short brightness pulse plus a tiny zoom.
 The `alt` file is the same still with the wave inverted — a cheap second
-option, not new art. Comic mood groups (`comic`, `sunny`, `game`,
-`sticker`, `yeah`) each use two original stills.
+option, not new art. Comic mood groups and IT-section groups each use
+two original stills, except `java` which reuses one still as `steam`.
 """
 
 from __future__ import annotations
@@ -64,6 +64,30 @@ VARIANTS = (
     ("sticker-thumb", "sticker", "thumb", False),
     ("yeah-pump", "yeah", "pump", False),
     ("yeah-jump", "yeah", "jump", False),
+    ("devops-loop", "devops", "loop", False),
+    ("devops-pipeline", "devops", "pipeline", False),
+    ("sre-lighthouse", "sre", "lighthouse", False),
+    ("sre-pager", "sre", "pager", False),
+    ("qa-lens", "qa", "lens", False),
+    ("qa-pass", "qa", "pass", False),
+    ("design-palette", "design", "palette", False),
+    ("design-frames", "design", "frames", False),
+    ("architecture-blocks", "architecture", "blocks", False),
+    ("architecture-blueprint", "architecture", "blueprint", False),
+    ("engineering-wrench", "engineering", "wrench", False),
+    ("engineering-build", "engineering", "build", False),
+    ("backend-db", "backend", "db", False),
+    ("backend-server", "backend", "server", False),
+    ("frontend-browser", "frontend", "browser", False),
+    ("frontend-cursor", "frontend", "cursor", False),
+    ("java-mug", "java", "mug", False),
+    ("java-mug", "java", "steam", True),
+    ("python-snake", "python", "snake", False),
+    ("python-coil", "python", "coil", False),
+    ("cpp-plus", "cpp", "plus", False),
+    ("cpp-gear", "cpp", "gear", False),
+    ("golang-gopher", "golang", "gopher", False),
+    ("golang-wave", "golang", "wave", False),
 )
 
 # Drop frames, colors, then pixels if a still is too busy for 180 KB.

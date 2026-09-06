@@ -1,0 +1,16 @@
+# Consumer pipeline. Store BITBUCKET_ACCESS_TOKEN as a secured repo variable
+# (pullrequest write). After the Docker image is on Docker Hub you can use
+# pipe: docker://yauhenbichel/merge-cheer:1.3.0 instead of the curl step.
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Merge Cheer
+          image: python:3.13
+          script:
+            - export ACTION_REF=v1.3.0
+            - export ACTION_REPO=YauhenBichel/merge-cheer
+            - export TOPIC="${TOPIC:-auto}"
+            - curl -fsSL "https://raw.githubusercontent.com/YauhenBichel/merge-cheer/${ACTION_REF}/src/celebrate.py" -o celebrate.py
+            - python3 celebrate.py

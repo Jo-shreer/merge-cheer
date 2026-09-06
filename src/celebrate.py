@@ -31,6 +31,18 @@ GROUPS = (
     "game",
     "sticker",
     "yeah",
+    "devops",
+    "sre",
+    "qa",
+    "design",
+    "architecture",
+    "engineering",
+    "backend",
+    "frontend",
+    "java",
+    "python",
+    "cpp",
+    "golang",
 )
 
 # Extra spellings that resolve to a group. `auto` and `title` are not aliases.
@@ -85,6 +97,47 @@ ALIASES = {
     "lets-go": "yeah",
     "let's-go": "yeah",
     "fist-pump": "yeah",
+    "devops": "devops",
+    "k8s": "devops",
+    "kubernetes": "devops",
+    "docker": "devops",
+    "terraform": "devops",
+    "sre": "sre",
+    "oncall": "sre",
+    "on-call": "sre",
+    "qa": "qa",
+    "testing": "qa",
+    "sdet": "qa",
+    "design": "design",
+    "ux": "design",
+    "ui": "design",
+    "figma": "design",
+    "architecture": "architecture",
+    "arch": "architecture",
+    "adr": "architecture",
+    "engineering": "engineering",
+    "swe": "engineering",
+    "software-engineering": "engineering",
+    "backend": "backend",
+    "back-end": "backend",
+    "frontend": "frontend",
+    "front-end": "frontend",
+    "javascript": "frontend",
+    "typescript": "frontend",
+    "js": "frontend",
+    "react": "frontend",
+    "java": "java",
+    "jdk": "java",
+    "jvm": "java",
+    "python": "python",
+    "py": "python",
+    "cpp": "cpp",
+    "c++": "cpp",
+    "cplusplus": "cpp",
+    "cxx": "cpp",
+    "golang": "golang",
+    "go": "golang",
+    "gopher": "golang",
 }
 
 # Giphy search text when a key is set.
@@ -106,6 +159,18 @@ GIPHY_TAG = {
     "game": "level up",
     "sticker": "sticker",
     "yeah": "yeah",
+    "devops": "devops",
+    "sre": "sre",
+    "qa": "testing",
+    "design": "design",
+    "architecture": "architecture",
+    "engineering": "engineering",
+    "backend": "backend",
+    "frontend": "frontend",
+    "java": "java",
+    "python": "python",
+    "cpp": "c++",
+    "golang": "golang",
 }
 
 # Alt text for the posted image.
@@ -127,6 +192,18 @@ LABEL = {
     "game": "game",
     "sticker": "sticker",
     "yeah": "yeah",
+    "devops": "devops",
+    "sre": "sre",
+    "qa": "qa",
+    "design": "design",
+    "architecture": "architecture",
+    "engineering": "engineering",
+    "backend": "backend",
+    "frontend": "frontend",
+    "java": "java",
+    "python": "python",
+    "cpp": "c++",
+    "golang": "golang",
 }
 
 FIRST_TIMERS = frozenset({"FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"})
@@ -138,7 +215,7 @@ _TITLE_RULES = (
     ("fix", ("fix", "bug", "hotfix", "patch")),
     ("ship", ("feat", "add ", "added", "new ", "launch", "ship:", "ship ")),
     ("docs", ("doc", "readme")),
-    ("tests", ("test", "ci")),
+    ("tests", ("test", " ci", "ci:", "ci ", "-ci")),
     ("cleanup", ("refactor", "clean")),
     ("welcome", ("welcome", "first contrib", "good first", "first-time")),
     ("party", ("party", "congrats", "woo", "hooray", "celebrate")),
@@ -151,6 +228,18 @@ _TITLE_RULES = (
     ("game", ("level-up", "level up", "combo", "high-score", "high score")),
     ("sticker", ("sticker",)),
     ("yeah", ("yeah", "let's go", "lets go", "fist pump", "fist-pump")),
+    ("devops", ("devops", "kubernetes", "k8s", "terraform", "docker", "helm")),
+    ("sre", ("sre", "on-call", "oncall", "error budget", "slo")),
+    ("qa", (" qa", "qa:", "sdet", "quality")),
+    ("design", ("design", "figma", "ux ", " ui:", "mockup")),
+    ("architecture", ("architecture", "adr", "system design")),
+    ("engineering", ("software engineering", " swe ", "swe:", "swe ")),
+    ("backend", ("backend", "back-end", "graphql")),
+    ("frontend", ("frontend", "front-end", "javascript", "typescript", "react", "vue")),
+    ("python", ("python", "django", "flask")),
+    ("cpp", ("c++", "cplusplus", " cpp", "cpp:", "cpp ")),
+    ("golang", ("golang", "gopher")),
+    ("java", ("java:", "java ", "jdk", "jvm", "spring boot")),
 )
 
 
@@ -207,9 +296,47 @@ def action_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+# Filenames the Action ships. Used when gifs/ is not on disk (GitLab /
+# Bitbucket curl the script only). Keep in sync with scripts/make_gifs.py.
+BUNDLED_GIFS = {
+    "ship": ("ship-it.gif", "alt.gif", "boost.gif"),
+    "fix": ("nailed-it.gif", "alt.gif", "spark.gif"),
+    "docs": ("nice-work.gif", "alt.gif", "glow.gif"),
+    "tests": ("high-five.gif", "alt.gif"),
+    "cleanup": ("cleanup.gif", "alt.gif", "sweep.gif"),
+    "celebration": ("celebration.gif", "alt.gif", "burst.gif"),
+    "welcome": ("high-five.gif", "celebration.gif"),
+    "party": ("confetti.gif", "toast.gif"),
+    "space": ("planet.gif", "comet.gif"),
+    "magic": ("wand.gif", "sparkles.gif"),
+    "coffee": ("mug.gif", "night.gif"),
+    "robot": ("wave.gif", "dance.gif"),
+    "comic": ("burst.gif", "pop.gif"),
+    "sunny": ("sun.gif", "rainbow.gif"),
+    "game": ("levelup.gif", "combo.gif"),
+    "sticker": ("star.gif", "thumb.gif"),
+    "yeah": ("pump.gif", "jump.gif"),
+    "devops": ("loop.gif", "pipeline.gif"),
+    "sre": ("lighthouse.gif", "pager.gif"),
+    "qa": ("lens.gif", "pass.gif"),
+    "design": ("palette.gif", "frames.gif"),
+    "architecture": ("blocks.gif", "blueprint.gif"),
+    "engineering": ("wrench.gif", "build.gif"),
+    "backend": ("db.gif", "server.gif"),
+    "frontend": ("browser.gif", "cursor.gif"),
+    "java": ("mug.gif", "steam.gif"),
+    "python": ("snake.gif", "coil.gif"),
+    "cpp": ("plus.gif", "gear.gif"),
+    "golang": ("gopher.gif", "wave.gif"),
+}
+
+
 def group_gif_names(root: Path, group: str) -> list[str]:
     folder = root / "gifs" / group
-    return [path.name for path in sorted(folder.glob("*.gif"))]
+    names = [path.name for path in sorted(folder.glob("*.gif"))]
+    if names:
+        return names
+    return list(BUNDLED_GIFS.get(group, ()))
 
 
 def pick_gif_name(names: list[str], seed: str) -> str:
@@ -284,14 +411,63 @@ def comment_body(message: str, author: str, tag: str, gif: str) -> str:
     return text
 
 
-def post_comment(token: str, repo: str, number: str, body: str) -> None:
+def detect_host() -> str:
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return "github"
+    if os.environ.get("GITLAB_CI") == "true":
+        return "gitlab"
+    if os.environ.get("BITBUCKET_COMMIT") or os.environ.get("BITBUCKET_REPO_FULL_NAME"):
+        return "bitbucket"
+    return "github"
+
+
+def is_bot_author(author: str, kind: str = "") -> bool:
+    if (kind or "").lower() == "bot":
+        return True
+    low = (author or "").lower()
+    if not low:
+        return False
+    return (
+        low.endswith("[bot]")
+        or low.endswith("_bot")
+        or low.endswith("-bot")
+        or "dependabot" in low
+        or low in {"ghost", "renovate-bot", "bitbucket-pipelines"}
+    )
+
+
+def _http_json(
+    url: str, token: str, method: str = "GET", payload: dict | None = None, headers: dict | None = None
+) -> object:
+    body = None if payload is None else json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=body,
+        method=method,
+        headers=headers
+        or {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "merge-cheer",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        raw = response.read()
+        print(f"{method} {response.status}")
+        if not raw:
+            return {}
+        return json.loads(raw)
+
+
+def post_github_comment(token: str, repo: str, number: str, body: str) -> None:
     if not token or not repo or not number:
         raise SystemExit("GITHUB_TOKEN, GITHUB_REPOSITORY, and PR_NUMBER are required")
-    data = json.dumps({"body": body}).encode("utf-8")
-    request = urllib.request.Request(
+    _http_json(
         f"https://api.github.com/repos/{repo}/issues/{number}/comments",
-        data=data,
+        token,
         method="POST",
+        payload={"body": body},
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
@@ -299,8 +475,135 @@ def post_comment(token: str, repo: str, number: str, body: str) -> None:
             "Content-Type": "application/json",
         },
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        print(f"commented {response.status}")
+
+
+def gitlab_headers(token: str) -> dict[str, str]:
+    job = os.environ.get("CI_JOB_TOKEN", "").strip()
+    if job and token == job:
+        return {
+            "JOB-TOKEN": token,
+            "User-Agent": "merge-cheer",
+            "Content-Type": "application/json",
+        }
+    return {
+        "PRIVATE-TOKEN": token,
+        "User-Agent": "merge-cheer",
+        "Content-Type": "application/json",
+    }
+
+
+def gitlab_api_root() -> str:
+    explicit = os.environ.get("CI_API_V4_URL", "").strip()
+    if explicit:
+        return explicit.rstrip("/")
+    host = os.environ.get("CI_SERVER_URL", "https://gitlab.com").rstrip("/")
+    return f"{host}/api/v4"
+
+
+def post_gitlab_note(token: str, project: str, iid: str, body: str) -> None:
+    if not token or not project or not iid:
+        raise SystemExit("GITLAB_TOKEN, CI_PROJECT_ID, and merge request iid are required")
+    encoded = urllib.parse.quote(str(project), safe="")
+    _http_json(
+        f"{gitlab_api_root()}/projects/{encoded}/merge_requests/{iid}/notes",
+        token,
+        method="POST",
+        payload={"body": body},
+        headers=gitlab_headers(token),
+    )
+
+
+def lookup_gitlab_mr(token: str) -> dict[str, str]:
+    project = os.environ.get("CI_PROJECT_ID", "").strip()
+    iid = os.environ.get("CI_MERGE_REQUEST_IID", "").strip()
+    sha = os.environ.get("CI_COMMIT_SHA", "").strip()
+    if not token or not project:
+        return {}
+    encoded = urllib.parse.quote(project, safe="")
+    data: object
+    if iid:
+        data = _http_json(
+            f"{gitlab_api_root()}/projects/{encoded}/merge_requests/{iid}",
+            token,
+            headers=gitlab_headers(token),
+        )
+    elif sha:
+        data = _http_json(
+            f"{gitlab_api_root()}/projects/{encoded}/repository/commits/{sha}/merge_requests",
+            token,
+            headers=gitlab_headers(token),
+        )
+        if isinstance(data, list):
+            data = data[0] if data else {}
+    else:
+        return {}
+    if not isinstance(data, dict) or not data:
+        return {}
+    if str(data.get("state") or "") not in {"merged", ""}:
+        if iid and str(data.get("state") or "") != "merged":
+            return {}
+    user = data.get("author") or {}
+    return {
+        "number": str(data.get("iid") or iid),
+        "title": str(data.get("title") or ""),
+        "author": str(user.get("username") or ""),
+        "association": "FIRST_TIME_CONTRIBUTOR"
+        if data.get("first_contribution")
+        else "",
+    }
+
+
+def post_bitbucket_comment(token: str, workspace: str, slug: str, number: str, body: str) -> None:
+    if not token or not workspace or not slug or not number:
+        raise SystemExit(
+            "BITBUCKET_ACCESS_TOKEN, BITBUCKET_WORKSPACE, BITBUCKET_REPO_SLUG, and PR id are required"
+        )
+    _http_json(
+        f"https://api.bitbucket.org/2.0/repositories/{workspace}/{slug}/pullrequests/{number}/comments",
+        token,
+        method="POST",
+        payload={"content": {"raw": body}},
+    )
+
+
+def lookup_bitbucket_pr(token: str) -> dict[str, str]:
+    workspace = os.environ.get("BITBUCKET_WORKSPACE", "").strip()
+    slug = os.environ.get("BITBUCKET_REPO_SLUG", "").strip()
+    number = os.environ.get("BITBUCKET_PR_ID", "").strip()
+    commit = os.environ.get("BITBUCKET_COMMIT", "").strip()
+    if not token or not workspace or not slug:
+        return {}
+    data: object
+    if number:
+        data = _http_json(
+            f"https://api.bitbucket.org/2.0/repositories/{workspace}/{slug}/pullrequests/{number}",
+            token,
+        )
+    elif commit:
+        data = _http_json(
+            f"https://api.bitbucket.org/2.0/repositories/{workspace}/{slug}/commit/{commit}/pullrequests",
+            token,
+        )
+        values = data.get("values") if isinstance(data, dict) else None
+        data = values[0] if values else {}
+    else:
+        return {}
+    if not isinstance(data, dict) or not data:
+        return {}
+    state = str(data.get("state") or "").upper()
+    if state and state != "MERGED":
+        return {}
+    author = ((data.get("author") or {}).get("nickname") or "")
+    return {
+        "number": str(data.get("id") or number),
+        "title": str(data.get("title") or ""),
+        "author": str(author),
+        "association": "",
+    }
+
+
+def post_comment(token: str, repo: str, number: str, body: str) -> None:
+    post_github_comment(token, repo, number, body)
 
 
 def write_output(path: str, values: dict[str, str]) -> None:
@@ -312,14 +615,40 @@ def write_output(path: str, values: dict[str, str]) -> None:
 
 
 def main() -> int:
+    host = detect_host()
     title = os.environ.get("PR_TITLE", "")
     topic = os.environ.get("TOPIC", "auto")
     association = os.environ.get("PR_AUTHOR_ASSOCIATION", "")
-    group = resolve_group(
-        title, topic, association, os.environ.get("PR_NUMBER", "")
-    )
+    author = os.environ.get("PR_AUTHOR", "").strip()
+    number = os.environ.get("PR_NUMBER", "").strip()
+    if host == "gitlab" and not number:
+        found = lookup_gitlab_mr(
+            (
+                os.environ.get("GITLAB_TOKEN")
+                or os.environ.get("CI_JOB_TOKEN")
+                or ""
+            ).strip()
+        )
+        title = title or found.get("title", "")
+        author = author or found.get("author", "")
+        number = found.get("number", "")
+        association = association or found.get("association", "")
+    if host == "bitbucket" and not number:
+        found = lookup_bitbucket_pr(
+            os.environ.get("BITBUCKET_ACCESS_TOKEN", "").strip()
+        )
+        title = title or found.get("title", "")
+        author = author or found.get("author", "")
+        number = found.get("number", "")
+    if is_bot_author(author, os.environ.get("PR_AUTHOR_TYPE", "")):
+        print("skip bot author")
+        return 0
+    if host in {"gitlab", "bitbucket"} and not number:
+        print("skip: no merged merge request")
+        return 0
+    group = resolve_group(title, topic, association, number)
     root = action_root()
-    group, name = choose_gif(root, group, os.environ.get("PR_NUMBER", ""))
+    group, name = choose_gif(root, group, number)
     gif = giphy_url(
         os.environ.get("GIPHY_API_KEY", "").strip(),
         GIPHY_TAG[group],
@@ -332,7 +661,6 @@ def main() -> int:
             group,
             name,
         )
-    author = os.environ.get("PR_AUTHOR", "").strip()
     label = LABEL[group]
     body = comment_body(os.environ.get("MESSAGE", ""), author, label, gif)
     write_output(
@@ -347,10 +675,31 @@ def main() -> int:
     if os.environ.get("DRY_RUN") == "1":
         print(body)
         return 0
-    post_comment(
+    if host == "gitlab":
+        post_gitlab_note(
+            (
+                os.environ.get("GITLAB_TOKEN")
+                or os.environ.get("CI_JOB_TOKEN")
+                or ""
+            ).strip(),
+            os.environ.get("CI_PROJECT_ID", "").strip(),
+            number,
+            body,
+        )
+        return 0
+    if host == "bitbucket":
+        post_bitbucket_comment(
+            os.environ.get("BITBUCKET_ACCESS_TOKEN", "").strip(),
+            os.environ.get("BITBUCKET_WORKSPACE", "").strip(),
+            os.environ.get("BITBUCKET_REPO_SLUG", "").strip(),
+            number,
+            body,
+        )
+        return 0
+    post_github_comment(
         os.environ.get("GITHUB_TOKEN", "").strip(),
         os.environ.get("GITHUB_REPOSITORY", "").strip(),
-        os.environ.get("PR_NUMBER", "").strip(),
+        number,
         body,
     )
     return 0
