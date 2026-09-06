@@ -165,3 +165,12 @@ each ship two original stills.
 
 [MIT](LICENSE). The GIFs are original stills animated for this Action.
 See [NOTICE](NOTICE).
+
+## Contributors
+
+Thank you to everyone who has helped.
+
+<!-- readme: contributors,bots/- -start -->
+<!-- readme: contributors,bots/- -end -->
+
+Filled from GitHub commits (bots omitted). Live demo: [readme-contributors](https://github.com/YauhenBichel/readme-contributors#live-demo).
