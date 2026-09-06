@@ -15,6 +15,11 @@ ships its own GIF groups and, by default, picks a **random theme**
 group with `topic` when you want one mood every time. Use `topic: title`
 to pick from the title instead.
 
+![Merge Cheer demo](docs/merge-cheer-demo.mp4)
+
+18 seconds. What the Action comments, then four shipped themes. Same
+file as the [site demo](https://yauhenbichel.github.io/merge-cheer/#demo).
+
 ## Install
 
 ```yaml
@@ -29,10 +34,10 @@ jobs:
     if: github.event.pull_request.merged && github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
-      - uses: YauhenBichel/merge-cheer@v1.1.0
+      - uses: YauhenBichel/merge-cheer@v1.3.0
 ```
 
-Pin `@v1.1.0` (current release). `@v1` is the older first release.
+Pin `@v1.3.0` (current release). `@v1` is the older first release.
 
 `pull_request_target` is what lets a fork merge get a comment. The action
 never checks out the pull request head.
@@ -40,7 +45,7 @@ never checks out the pull request head.
 Pin a group:
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1.1.0
+- uses: YauhenBichel/merge-cheer@v1.3.0
   with:
     topic: ship   # or party, comic, sunny, game, sticker, yeah
 ```
@@ -54,8 +59,30 @@ to `celebration` and prints the list.
 
 ## Live demo
 
-This README is the demo. The loops below are the files the Action
-posts (open the file on GitHub to see them move).
+The video above is the walkthrough. What / why / where / how:
+
+**What.** Merge Cheer comments one G-rated GIF when a human pull request
+merges. Bots are skipped. The Action does not check out the pull request.
+
+**Why.** The merge is the moment people actually did the work. No Giphy
+key. The Action ships its own loops, so it works on a new repository
+with the default token.
+
+**Where.** Code is this repository. The same video and a walkthrough live
+on the site:
+[yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/#demo).
+Real comments already landed on
+[py-harness #350](https://github.com/YauhenBichel/py-harness/pull/350#issuecomment-5559092736)
+and
+[molecare-desktop #26](https://github.com/MoleCare/molecare-desktop/pull/26#issuecomment-5559101123).
+
+**How.** Pin `@v1.3.0` on the default branch (see [Install](#install)).
+Leave `topic` unset (or `topic: auto`) for a random theme, seeded by the
+pull request number. Pin `topic: comic` when you want the same mood
+every time.
+
+The loops below are the files the Action posts (open a file on GitHub to
+see it move).
 
 | ship | fix | docs | tests |
 | --- | --- | --- | --- |
@@ -91,7 +118,7 @@ yet — that workflow is what will write it.
 **Personal:** [readme-contributors](https://github.com/YauhenBichel/readme-contributors).
 
 To be listed, merge a celebrate workflow that
-`uses: YauhenBichel/merge-cheer@v1.1.0` on the default branch.
+`uses: YauhenBichel/merge-cheer@v1.3.0` on the default branch.
 
 ## Topics
 
@@ -143,7 +170,7 @@ Aliases: `launch` → `ship`, `nailed-it` → `fix`, `nice-work` → `docs`,
 | `rating` | `g` | Giphy rating when a key is set |
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1.1.0
+- uses: YauhenBichel/merge-cheer@v1.3.0
   with:
     topic: welcome
     giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
@@ -179,7 +206,7 @@ python3 -m unittest discover -s tests -q
 
 ## Publish a release
 
-Current release is `v1.1.0` (`@v1` is the first tag, not a floating
+Current release is `v1.3.0` (`@v1` is the first tag, not a floating
 major). A Marketplace-facing Release is tests plus a human review —
 see [RELEASE.md](RELEASE.md). Pushing a tag does not publish. After
 the reviewed Release exists, tick Marketplace on
