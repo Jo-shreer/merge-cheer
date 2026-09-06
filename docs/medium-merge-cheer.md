@@ -1,6 +1,6 @@
 # Merge Cheer comments a GIF when your pull request merges
 
-[Merge Cheer](https://github.com/YauhenBichel/merge-cheer) is a GitHub Action. A human pull request merges. The Action writes one comment: a thank-you, plus a G-rated looping GIF it already ships. Bots are skipped. No Giphy key. No checkout of the pull request.
+[Merge Cheer](https://github.com/YauhenBichel/merge-cheer) is a GitHub Action ([Marketplace](https://github.com/marketplace/actions/merge-cheer)). A human pull request merges. The Action writes one comment: a thank-you, plus a G-rated looping GIF it already ships. Bots are skipped. No Giphy key. No checkout of the pull request.
 
 This is the 18-second walkthrough — the comment it posts, then four of the themes:
 

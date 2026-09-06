@@ -5,9 +5,10 @@ pull request merges.
 
 [![CI](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.4.1-6e5494)](https://github.com/marketplace/actions/merge-cheer)
 [![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-Site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/)
+Site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/) · Marketplace: [merge-cheer](https://github.com/marketplace/actions/merge-cheer)
 
 GIF on merge, no Giphy key, no checkout of the pull request. The action
 ships its own GIF groups and, by default, picks a **random theme**
@@ -287,11 +288,9 @@ python3 -m unittest discover -s tests -q
 ## Publish a release
 
 Current release is `v1.4.1` (`@v1` is the first tag, not a floating
-major). A Marketplace-facing Release is tests plus a human review —
-see [RELEASE.md](RELEASE.md). Pushing a tag does not publish. After
-the reviewed Release exists, tick Marketplace on
-`releases/edit/<tag>` for the **first** listing only. Do not add a
-Marketplace badge until that listing is live.
+major). Listed on the [GitHub Marketplace](https://github.com/marketplace/actions/merge-cheer).
+A reviewed Release is tests plus a human review — see [RELEASE.md](RELEASE.md).
+Pushing a tag does not publish. Later releases update the existing listing.
 
 The site is [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/).
 The first Pages job 404s until you turn the site on in a browser:
