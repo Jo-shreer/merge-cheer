@@ -1,36 +1,44 @@
-# I got tired of merge GIFs that needed a Giphy key
+# Merge Cheer comments a GIF when your pull request merges
 
-**A GitHub Action that comments a G-rated GIF when a pull request merges. v1.3.0 picks a random theme by default. No Giphy secret.**
+[Merge Cheer](https://github.com/YauhenBichel/merge-cheer) is a GitHub Action. A human pull request merges. The Action writes one comment: a thank-you, plus a G-rated looping GIF it already ships. Bots are skipped. No Giphy key. No checkout of the pull request.
 
-Most “celebrate the merge” Actions do the same two things.
+This is the 18-second walkthrough — the comment it posts, then four of the themes:
 
-They ask for a Giphy API key. Then they post whatever the API returns. Sometimes that is a pixel parrot that has nothing to do with the pull request. Sometimes the key is missing and the comment is empty. You also have to trust a third-party GIF search on every merge.
+[![Merge Cheer demo](https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo-poster.png)](https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo.mp4)
 
-I wanted the other shape: merge a PR, get one comment, see a GIF I actually own.
+https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo.mp4
 
-That is [Merge Cheer](https://github.com/YauhenBichel/merge-cheer).
+The same player lives on the site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/#demo).
 
-It is a small GitHub Action. On `pull_request_target` closed, if the PR merged and the author is not a bot, it comments a thank-you plus a G-rated looping GIF. It does not check out the pull request. It does not need a secret. The GIFs live in the Action repo.
+Most merge-GIF Actions ask for a Giphy secret and then post whatever the API returns. I wanted the other shape. The loops are files in the Action repo. A new repository can use it with the default token.
 
-Live demo (the loops move on the page):
-
-https://yauhenbichel.github.io/merge-cheer/
-
-Two of the files the Action posts:
-
-![comic pop](https://yauhenbichel.github.io/merge-cheer/gifs/comic/pop.gif)
-
-![sunny](https://yauhenbichel.github.io/merge-cheer/gifs/sunny/sun.gif)
-
-The comment itself is boring on purpose:
+The comment is boring on purpose:
 
 ```
 Merged — thank you @alice.
-
-![comic](https://raw.githubusercontent.com/YauhenBichel/merge-cheer/v1.3.0/gifs/comic/pop.gif)
 ```
 
-Install is one step, pinned to the current release:
+Then one of these:
+
+![comic](https://yauhenbichel.github.io/merge-cheer/gifs/comic/pop.gif)
+
+![sunny](https://yauhenbichel.github.io/merge-cheer/gifs/sunny/sun.gif)
+
+![game](https://yauhenbichel.github.io/merge-cheer/gifs/game/levelup.gif)
+
+![python](https://yauhenbichel.github.io/merge-cheer/gifs/python/snake.gif)
+
+That last one is an IT-section theme. The Action also ships DevOps, SRE, QA, design, architecture, engineering, backend, frontend, Java, C++, and Golang, next to the older packs (ship, fix, party, comic, …).
+
+Default `topic: auto` picks a **random theme**, seeded by the pull request number, so the same PR stays stable if the job reruns. Pin a group when the repo has a home:
+
+```yaml
+- uses: YauhenBichel/merge-cheer@v1.3.0
+  with:
+    topic: python
+```
+
+Or leave `topic` unset:
 
 ```yaml
 name: Celebrate merge
@@ -47,22 +55,17 @@ jobs:
       - uses: YauhenBichel/merge-cheer@v1.3.0
 ```
 
-`topic` defaults to `auto`. That is a **random theme**, seeded by the pull request number so the same PR does not flip if the job reruns. Different PR numbers can land on comic, sunny, ship, party, and the rest.
+`topic: title` is the old picker. It reads the PR title (`fix`, `feat`, `docs`). Conventional types still win, so `feat: add python client` ships. An unknown name falls back to `celebration`.
 
-Pin a mood when you want the same group every time:
+It is already posting on public repos. Two real merge comments:
 
-```yaml
-- uses: YauhenBichel/merge-cheer@v1.3.0
-  with:
-    topic: comic
-```
+- [py-harness #350](https://github.com/YauhenBichel/py-harness/pull/350#issuecomment-5559092736) — comic / burst
+- [molecare-desktop #26](https://github.com/MoleCare/molecare-desktop/pull/26#issuecomment-5559101123) — game / level-up
 
-`topic: title` is the old picker. It reads keywords in the PR title (`fix`, `feat`, `docs`, …). Keep it if you liked that. New installs can leave `topic` unset.
+Also on molecare-mcp, molecare-ml, molecare-skin-llm, MoleCare/.github, python-vibe, and [readme-contributors](https://github.com/YauhenBichel/readme-contributors), all pinned to `@v1.3.0`.
 
-An unknown name falls back to `celebration` and prints the allowed list.
+Code: [github.com/YauhenBichel/merge-cheer](https://github.com/YauhenBichel/merge-cheer)
 
-I already run this on the MoleCare repos, py-harness, python-vibe, and readme-contributors, all on the default branch at `@v1.3.0`.
+Release: [v1.3.0](https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.3.0)
 
-Repo: https://github.com/YauhenBichel/merge-cheer
-
-Release: https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.3.0
+Demo video: [merge-cheer-demo.mp4](https://yauhenbichel.github.io/merge-cheer/merge-cheer-demo.mp4)
