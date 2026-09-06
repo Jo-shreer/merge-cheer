@@ -28,6 +28,8 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          # Ubuntu git is case-sensitive. Do not add README or readme.md:
+          # those paths do not exist here and `git add` exits 128.
           git add README.md .github/contributors.svg
           git diff --cached --quiet && exit 0
           git commit -m "docs: refresh README contributors"
