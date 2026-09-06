@@ -5,7 +5,6 @@ name: Publish Docker
 #
 # Secrets: DOCKERHUB_USERNAME (Hub username, not email) and
 # DOCKERHUB_TOKEN (Hub Access Token Read & Write — not account password).
-# No trailing newline in either secret.
 
 on:
   workflow_dispatch:
@@ -36,23 +35,36 @@ jobs:
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
           echo "image_tag=${VERSION#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Require Docker Hub secrets
+      - name: Sanitize Docker Hub secrets
+        id: hub
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          RAW_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          RAW_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
+          # echo/gh secret set often leave a trailing newline → malformed Authorization
+          USER="$(printf '%s' "${RAW_USER:-}" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          TOKEN="$(printf '%s' "${RAW_TOKEN:-}" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          if [ -z "$USER" ] || [ -z "$TOKEN" ]; then
             echo "::error::Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets."
             echo "::error::USERNAME = Hub username, not email."
             echo "::error::TOKEN = Hub Access Token (Read & Write), not account password."
             exit 1
           fi
-          if [ "$DOCKERHUB_USERNAME" != "$(printf '%s' "$DOCKERHUB_USERNAME")" ] || \
-             [ "$DOCKERHUB_TOKEN" != "$(printf '%s' "$DOCKERHUB_TOKEN")" ]; then
-            echo "::error::DOCKERHUB_* secrets must not contain leading/trailing whitespace or newlines."
-            exit 1
-          fi
+          case "$USER" in
+            *@*)
+              echo "::error::DOCKERHUB_USERNAME looks like an email; use the Hub username."
+              exit 1
+              ;;
+          esac
+          echo "username_len=${#USER} token_len=${#TOKEN}"
+          echo "::add-mask::$USER"
+          echo "::add-mask::$TOKEN"
+          echo "username=$USER" >> "$GITHUB_OUTPUT"
+          {
+            echo "DOCKERHUB_USERNAME=$USER"
+            echo "DOCKERHUB_TOKEN=$TOKEN"
+          } >> "$GITHUB_ENV"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -64,23 +76,23 @@ jobs:
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
-      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        run: |
+          set -euo pipefail
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 
       - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/merge-cheer:${{ steps.ver.outputs.image_tag }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/merge-cheer:latest
+            ${{ steps.hub.outputs.username }}/merge-cheer:${{ steps.ver.outputs.image_tag }}
+            ${{ steps.hub.outputs.username }}/merge-cheer:latest
           provenance: false
 
       - name: Summary
         env:
-          USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          USER: ${{ steps.hub.outputs.username }}
           IMAGE_TAG: ${{ steps.ver.outputs.image_tag }}
           GIT_TAG: ${{ steps.ver.outputs.tag }}
         run: |
