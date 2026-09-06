@@ -213,6 +213,15 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("github.event.repository.default_branch", dogfood)
         self.assertNotIn("pull_request.head", dogfood)
 
+    def test_contributors_push_does_not_add_missing_readme_names(self) -> None:
+        """Ubuntu git is case-sensitive; `git add README` exits 128."""
+        text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("git add README.md .github/contributors.svg", text)
+        self.assertNotIn("git add README.md README", text)
+        self.assertNotIn("readme.md", text)
+
 
 if __name__ == "__main__":
     unittest.main()
