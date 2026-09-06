@@ -406,7 +406,8 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("YauhenBichel/readme-contributors", html)
         self.assertNotIn("/Users/", html)
         self.assertNotIn("DevBox/", html)
-        self.assertNotIn("marketplace/actions", html)
+        self.assertIn("marketplace/actions/merge-cheer", html)
+        self.assertIn("marketplace/actions/merge-cheer", readme)
         self.assertNotIn("<script", html)
         self.assertIn("https://yauhenbichel.github.io/merge-cheer/", readme)
         self.assertIn("GitLab", html)
@@ -439,7 +440,7 @@ class CelebrateTest(unittest.TestCase):
         )
         self.assertIn("YauhenBichel/merge-cheer@v1.4.1", medium)
         self.assertIn("random theme", medium)
-        self.assertNotIn("marketplace/actions", medium)
+        self.assertIn("marketplace/actions/merge-cheer", medium)
         self.assertNotIn("/Users/", medium)
         self.assertNotIn("DevBox/", medium)
 
@@ -475,7 +476,8 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("RELEASE.md", readme)
         self.assertNotIn("/Users/", notes)
         self.assertNotIn("DevBox/", notes)
-        self.assertNotIn("marketplace/actions", notes)
+        self.assertIn("marketplace/actions/merge-cheer", notes)
+        self.assertIn("marketplace=true", notes)
 
     def test_contributors_push_does_not_add_missing_readme_names(self) -> None:
         """Ubuntu git is case-sensitive; `git add` of a missing path exits 128."""

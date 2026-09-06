@@ -44,18 +44,15 @@ from automation.
    the Release already exists (safe to re-run). `action.yml` is not an
    asset — the tag **is** the Action version.
 
-## Marketplace (browser, first listing only)
+## Marketplace
 
-After the reviewed Release exists, and only then:
+Listing: https://github.com/marketplace/actions/merge-cheer
 
-https://github.com/YauhenBichel/merge-cheer/releases/edit/v1.2.0
+The first publish is a browser + 2FA step (no API). Prefer:
 
-Tick **Publish this Action to the GitHub Marketplace**, pick a
-category, and save. 2FA is required. That checkbox is a one-time
-browser step. Later reviewed Releases update the existing listing if
-it is already published.
+https://github.com/YauhenBichel/merge-cheer/releases/edit/v1.4.1?marketplace=true
 
-Do not add a Marketplace badge until that listing is live.
+Later reviewed Releases update that listing automatically once it exists.
 
 ## Docker Hub + GitLab (from GitHub Actions)
 

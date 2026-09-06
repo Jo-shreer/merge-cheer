@@ -95,5 +95,7 @@ review. Atlassian merges it before the pipe appears in the Pipelines UI.
 
 ## GitHub Marketplace
 
-Still the browser tick on `releases/edit/<tag>` for the first listing
-(no API; 2FA required). See [RELEASE.md](RELEASE.md).
+Listed: https://github.com/marketplace/actions/merge-cheer
+
+First publish was a browser + 2FA tick (no API). Later releases update
+that listing. See [RELEASE.md](RELEASE.md).
