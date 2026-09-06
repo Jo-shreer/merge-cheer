@@ -1,0 +1,89 @@
+name: Mirror to GitLab
+
+# Optional push-mirror so GitLab CI/CD Catalog can release from the same
+# tags. Preferred alternative: GitLab pull mirror (no GitHub secrets).
+#
+# One-time (human):
+# 1. Create public project https://gitlab.com/YauhenBichel/merge-cheer
+# 2. Settings → General → Visibility → CI/CD Catalog project
+# 3. Add project description; keep README + templates/merge-cheer.yml
+# 4. Create a Project Access Token (write_repository + api) named
+#    GITLAB_MIRROR_TOKEN and store it as a GitHub Actions secret
+#    (same name). Optional: GITLAB_PROJECT_PATH default
+#    YauhenBichel/merge-cheer
+#
+# After a successful mirror of tag vX.Y.Z, GitLab's .gitlab-ci.yml
+# create-release job publishes the Catalog version (release: keyword).
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to mirror (branch or tag, for example v1.4.0 or main)
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-gitlab
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if secret missing
+        id: gate
+        env:
+          TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN:-}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::GITLAB_MIRROR_TOKEN not set — skipping. Use a GitLab pull mirror, or add the secret."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.gate.outputs.skip != 'true'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+
+      - name: Push to GitLab
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+          PROJECT: ${{ secrets.GITLAB_PROJECT_PATH }}
+          REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          PROJECT="${PROJECT:-YauhenBichel/merge-cheer}"
+          git remote remove gitlab 2>/dev/null || true
+          git remote add gitlab "https://oauth2:${TOKEN}@gitlab.com/${PROJECT}.git"
+          # Always push the exact ref that triggered this run
+          if git show-ref --verify --quiet "refs/tags/${REF}"; then
+            git push gitlab "refs/tags/${REF}:refs/tags/${REF}" --force
+            # Keep main tip in sync for Catalog browsing
+            git push gitlab "HEAD:refs/heads/main" --force
+          else
+            git push gitlab "HEAD:refs/heads/${REF}" --force
+            git push gitlab --tags
+          fi
+          {
+            echo "### Mirrored to GitLab"
+            echo
+            echo "- Project: https://gitlab.com/${PROJECT}"
+            echo "- Ref: \`${REF}\`"
+            echo
+            echo "If this was a semver tag and Catalog is enabled, the GitLab"
+            echo "tag pipeline should run \`create-release\` and list the version."
+          } >> "$GITHUB_STEP_SUMMARY"

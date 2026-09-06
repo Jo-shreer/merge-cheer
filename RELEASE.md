@@ -57,6 +57,19 @@ it is already published.
 
 Do not add a Marketplace badge until that listing is live.
 
-GitLab Catalog and Bitbucket Pipes are separate listings. Mirror,
-release, and review steps are in [MARKETPLACES.md](MARKETPLACES.md).
-Do not claim those rows exist until their catalog URLs return 200.
+## Docker Hub + GitLab (from GitHub Actions)
+
+After the GitHub Release exists (or for an existing tag):
+
+1. **Docker Hub (Bitbucket pipe image)** — one-time secrets
+   `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. Then either wait for the
+   automatic **Publish Docker** run on `release: published`, or run
+   Actions → **Publish Docker** with `v1.4.0`.
+2. **GitLab Catalog** — create `YauhenBichel/merge-cheer` on GitLab,
+   enable **CI/CD Catalog project**, then either configure a GitLab
+   **pull mirror** or set `GITLAB_MIRROR_TOKEN` and run **Mirror to
+   GitLab**. Tag pipelines on GitLab publish Catalog versions via the
+   `release:` keyword.
+
+Details: [MARKETPLACES.md](MARKETPLACES.md). Do not claim those rows
+exist until their catalog URLs return 200.
