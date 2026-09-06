@@ -375,12 +375,12 @@ class CelebrateTest(unittest.TestCase):
         self.assertNotIn("marketplace/actions", notes)
 
     def test_contributors_push_does_not_add_missing_readme_names(self) -> None:
-        """Ubuntu git is case-sensitive; `git add README` exits 128."""
+        """Ubuntu git is case-sensitive; `git add` of a missing path exits 128."""
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
             encoding="utf-8"
         )
-        self.assertIn("git add README.md .github/contributors.svg", text)
-        forbidden = {"README", "readme.md"}
+        self.assertIn("format: html", text)
+        forbidden = {"README", "readme.md", ".github/contributors.svg"}
         added: list[str] = []
         for line in text.splitlines():
             stripped = line.strip()
@@ -388,7 +388,11 @@ class CelebrateTest(unittest.TestCase):
                 continue
             added.extend(stripped.split()[2:])
         self.assertIn("README.md", added)
-        self.assertIn(".github/contributors.svg", added)
+        self.assertIn("[ -d .github/faces ] && git add .github/faces", text)
+        self.assertIn(
+            "[ -e .github/contributors.svg ] && git add .github/contributors.svg",
+            text,
+        )
         self.assertEqual([name for name in added if name in forbidden], [])
         self.assertIn("pull-requests: write", text)
         self.assertIn("docs/contributors", text)
