@@ -82,7 +82,7 @@
     </ul>
 
     <h2>GIF on merge</h2>
-    <p>No Giphy key. No checkout of the pull request. The Action ships its own GIF groups and, by default, picks one from the title. Pin a group with <code>topic</code> when you want one mood every time.</p>
+    <p>No Giphy key. No checkout of the pull request. The Action ships its own GIF groups and, by default, picks a <strong>random theme</strong> (seeded by the pull request number so the same PR stays stable). Pin a group with <code>topic</code> when you want one mood every time. Use <code>topic: title</code> to pick from the title instead.</p>
 
     <div class="grid">
       <figure><img src="gifs/ship/ship-it.gif" alt="ship GIF"><figcaption>ship</figcaption></figure>
@@ -120,7 +120,7 @@ jobs:
     <p class="mute">Pin <code>@v1.1.0</code> (current release). <code>@v1</code> is the older first release.</p>
 
     <h2>Topics</h2>
-    <p><code>topic</code> is <code>auto</code> when unset. Allowed names: <code>auto</code>, <code>ship</code>, <code>fix</code>, <code>docs</code>, <code>tests</code>, <code>cleanup</code>, <code>celebration</code>, <code>welcome</code>, <code>party</code>, <code>space</code>, <code>magic</code>, <code>coffee</code>, <code>robot</code>, <code>comic</code>, <code>sunny</code>, <code>game</code>, <code>sticker</code>, <code>yeah</code>.</p>
+    <p><code>topic</code> is <code>auto</code> when unset: a random shipped theme, then one GIF in that group. Different PR numbers can land on different groups. Allowed names: <code>auto</code>, <code>title</code>, <code>ship</code>, <code>fix</code>, <code>docs</code>, <code>tests</code>, <code>cleanup</code>, <code>celebration</code>, <code>welcome</code>, <code>party</code>, <code>space</code>, <code>magic</code>, <code>coffee</code>, <code>robot</code>, <code>comic</code>, <code>sunny</code>, <code>game</code>, <code>sticker</code>, <code>yeah</code>. Pin a group (for example <code>topic: comic</code>) to keep that mood. An unknown name falls back to <code>celebration</code>.</p>
 
     <h2>Used by</h2>
     <p>6 public repositories already run Merge Cheer on the default branch.</p>
