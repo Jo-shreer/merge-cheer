@@ -1,5 +1,5 @@
 name: Merge Cheer
-description: Comment a G-rated celebration GIF when a pull request merges. Zero config.
+description: Zero-config GitHub Action that comments a G-rated celebration GIF when a pull request merges.
 author: Yauhen Bichel
 branding:
   icon: award

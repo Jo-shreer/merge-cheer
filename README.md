@@ -1,15 +1,18 @@
 # Merge Cheer
 
+Zero-config GitHub Action that comments a G-rated celebration GIF when a
+pull request merges.
+
 [![CI](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-Comment a G-rated celebration GIF when a pull request merges.
+Site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/)
 
-No Giphy key. No checkout of the pull request. The action ships its own
-GIF groups and, by default, picks one from the title (`fix` / `feat` /
-`docs` / `test` / `refactor`, otherwise a general celebration). Pin a
-group with `topic` when you want one mood every time.
+GIF on merge, no Giphy key, no checkout of the pull request. The action
+ships its own GIF groups and, by default, picks one from the title
+(`fix` / `feat` / `docs` / `test` / `refactor`, otherwise a general
+celebration). Pin a group with `topic` when you want one mood every time.
 
 ## Install
 
@@ -25,8 +28,10 @@ jobs:
     if: github.event.pull_request.merged && github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
-      - uses: YauhenBichel/merge-cheer@v1
+      - uses: YauhenBichel/merge-cheer@v1.1.0
 ```
+
+Pin `@v1.1.0` (current release). `@v1` is the older first release.
 
 `pull_request_target` is what lets a fork merge get a comment. The action
 never checks out the pull request head.
@@ -34,7 +39,7 @@ never checks out the pull request head.
 Pin a group:
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1
+- uses: YauhenBichel/merge-cheer@v1.1.0
   with:
     topic: ship   # or party, space, magic, coffee, robot
 ```
@@ -65,6 +70,21 @@ The in-the-wild demo is the next merged pull request on this
 repository: [.github/workflows/celebrate.yml](.github/workflows/celebrate.yml)
 runs `uses: ./` and comments one of these GIFs. No merge comment exists
 yet — that workflow is what will write it.
+
+## Used by
+
+6 public repositories already run Merge Cheer on the default branch.
+
+**MoleCare:** [molecare-mcp](https://github.com/MoleCare/molecare-mcp),
+[molecare-ml](https://github.com/MoleCare/molecare-ml),
+[molecare-desktop](https://github.com/MoleCare/molecare-desktop),
+[molecare-skin-llm](https://github.com/MoleCare/molecare-skin-llm),
+[.github](https://github.com/MoleCare/.github).
+
+**Personal:** [readme-contributors](https://github.com/YauhenBichel/readme-contributors).
+
+To be listed, merge a celebrate workflow that
+`uses: YauhenBichel/merge-cheer@v1.1.0` on the default branch.
 
 ## Topics
 
@@ -109,7 +129,7 @@ Aliases: `launch` → `ship`, `nailed-it` → `fix`, `nice-work` → `docs`,
 | `rating` | `g` | Giphy rating when a key is set |
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1
+- uses: YauhenBichel/merge-cheer@v1.1.0
   with:
     topic: welcome
     giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
@@ -145,9 +165,14 @@ python3 -m unittest discover -s tests -q
 
 ## Publish a release
 
-This folder is the Action. On GitHub: create a **public** repository
-named `merge-cheer`, push `main`, then tag `v1`. Marketplace listing is
-**Settings → actions → publish** after that tag exists.
+Current release is `v1.1.0` (`@v1` is the first tag). Marketplace
+listing is **Settings → Actions → Publish** after a tag exists. Do not
+add a Marketplace badge until that listing is live.
+
+The site is [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/).
+The first Pages job 404s until you turn the site on in a browser:
+**Settings → Pages → Build and deployment → Source → GitHub Actions**.
+Then re-run the Pages workflow.
 
 ## Rebuild the GIFs
 
