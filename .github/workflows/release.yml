@@ -151,7 +151,7 @@ jobs:
           set -euo pipefail
           if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
             echo "::error::Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets."
-            echo "::error::USERNAME = Hub username (e.g. yauhenbichel), not email."
+            echo "::error::USERNAME = Hub username, not email."
             echo "::error::TOKEN = Hub Access Token (Read & Write), not account password."
             exit 1
           fi

@@ -64,7 +64,7 @@ A usable pipe needs a **public Docker image**. The UI catalog is separate.
 
 ### Docker Hub (automatable from GitHub)
 
-1. Create a Docker Hub account / namespace (for example `yauhenbichel`).
+1. Create a Docker Hub account / namespace that will own the pipe image.
 2. Add GitHub Actions secrets:
    - `DOCKERHUB_USERNAME` — Hub **username** (not email)
    - `DOCKERHUB_TOKEN` — Hub **Access Token** (Read & Write), no newline
