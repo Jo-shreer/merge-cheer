@@ -189,10 +189,19 @@ jobs:
           fi
           PIPE_NS="$(sed -n 's/^image:[[:space:]]*\([^/:[:space:]]*\)\/.*/\1/p' pipe.yml | head -n1)"
           echo "username_len=${#USER} token_len=${#TOKEN} token_kind=${KIND} pipe_namespace=${PIPE_NS:-unknown}"
-          if [ -n "${PIPE_NS:-}" ] && [ "$USER" != "$PIPE_NS" ]; then
-            echo "::error::DOCKERHUB_USERNAME does not match pipe.yml image namespace (${PIPE_NS})."
-            echo "::error::Update the secret to exactly that Hub namespace."
-            exit 1
+          if [ -n "${PIPE_NS:-}" ]; then
+            USER_LC="$(printf '%s' "$USER" | tr '[:upper:]' '[:lower:]')"
+            PIPE_LC="$(printf '%s' "$PIPE_NS" | tr '[:upper:]' '[:lower:]')"
+            if [ "$USER_LC" != "$PIPE_LC" ]; then
+              echo "::error::DOCKERHUB_USERNAME does not match pipe.yml image namespace (${PIPE_NS})."
+              echo "::error::Update the secret to that Hub namespace (case-insensitive)."
+              exit 1
+            fi
+            # Prefer pipe.yml casing for image tags (Hub namespaces are lowercase).
+            if [ "$USER" != "$PIPE_NS" ]; then
+              echo "Normalizing DOCKERHUB_USERNAME casing to pipe.yml (${PIPE_NS})."
+              USER="$PIPE_NS"
+            fi
           fi
           echo "::add-mask::$USER"
           echo "::add-mask::$TOKEN"
