@@ -219,8 +219,16 @@ class CelebrateTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("git add README.md .github/contributors.svg", text)
-        self.assertNotIn("git add README.md README", text)
-        self.assertNotIn("readme.md", text)
+        forbidden = {"README", "readme.md"}
+        added: list[str] = []
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("git add "):
+                continue
+            added.extend(stripped.split()[2:])
+        self.assertIn("README.md", added)
+        self.assertIn(".github/contributors.svg", added)
+        self.assertEqual([name for name in added if name in forbidden], [])
 
 
 if __name__ == "__main__":
