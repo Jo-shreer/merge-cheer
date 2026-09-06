@@ -11,7 +11,9 @@ inputs:
     default: ${{ github.token }}
   topic:
     description: >
-      GIF group. auto (default) picks from the PR title.
+      GIF group. auto (default) picks a random theme, seeded by the
+      pull request number so the same PR stays stable. Set a group
+      name to pin that mood. title picks from the PR title.
       Groups: ship, fix, docs, tests, cleanup, celebration, welcome,
       party, space, magic, coffee, robot, comic, sunny, game, sticker,
       yeah.

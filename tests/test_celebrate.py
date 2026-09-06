@@ -150,10 +150,34 @@ class CelebrateTest(unittest.TestCase):
         )
         self.assertEqual(celebrate.pick_from_title("fix: leak", "FIRST_TIMER"), "fix")
 
-    def test_auto_topic_uses_the_title(self) -> None:
+    def test_auto_topic_picks_a_shipped_group(self) -> None:
         celebrate = _load()
-        self.assertEqual(celebrate.resolve_group("feat: add login", "auto"), "ship")
-        self.assertEqual(celebrate.resolve_group("feat: add login", ""), "ship")
+        for topic in ("auto", ""):
+            group = celebrate.resolve_group("feat: add login", topic, seed="12")
+            self.assertIn(group, celebrate.GROUPS)
+
+    def test_auto_topic_ignores_title_keywords(self) -> None:
+        celebrate = _load()
+        from_feat = celebrate.resolve_group("feat: add login", "auto", seed="12")
+        from_fix = celebrate.resolve_group("fix: leak", "auto", seed="12")
+        from_chore = celebrate.resolve_group("chore: bump", "auto", seed="12")
+        self.assertEqual(from_feat, from_fix)
+        self.assertEqual(from_fix, from_chore)
+        self.assertIn(from_feat, celebrate.GROUPS)
+
+    def test_auto_topic_can_vary_by_pr_number(self) -> None:
+        celebrate = _load()
+        groups = {
+            celebrate.resolve_group("chore: bump", "auto", seed=str(number))
+            for number in range(1, 80)
+        }
+        self.assertGreater(len(groups), 1)
+        self.assertTrue(groups <= set(celebrate.GROUPS))
+
+    def test_title_topic_uses_the_title(self) -> None:
+        celebrate = _load()
+        self.assertEqual(celebrate.resolve_group("feat: add login", "title"), "ship")
+        self.assertEqual(celebrate.resolve_group("fix: leak", "title"), "fix")
 
     def test_explicit_topic_selects_that_group(self) -> None:
         celebrate = _load()
@@ -203,6 +227,19 @@ class CelebrateTest(unittest.TestCase):
             "https://raw.githubusercontent.com/YauhenBichel/merge-cheer/v1/gifs/ship/ship-it.gif",
         )
 
+    def test_bundled_url_falls_back_when_action_repo_is_empty(self) -> None:
+        celebrate = _load()
+        url = celebrate.bundled_url("", "v1.3.0", "ship", "ship-it.gif")
+        self.assertEqual(
+            url,
+            "https://raw.githubusercontent.com/YauhenBichel/merge-cheer/v1.3.0/gifs/ship/ship-it.gif",
+        )
+        blank = celebrate.bundled_url("   ", "main", "comic", "burst.gif")
+        self.assertEqual(
+            blank,
+            "https://raw.githubusercontent.com/YauhenBichel/merge-cheer/main/gifs/comic/burst.gif",
+        )
+
     def test_comment_mentions_the_author(self) -> None:
         celebrate = _load()
         body = celebrate.comment_body(
@@ -228,6 +265,8 @@ class CelebrateTest(unittest.TestCase):
         celebrate = _load()
         text = ACTION.read_text(encoding="utf-8")
         self.assertIn("topic:", text)
+        self.assertIn("random theme", text)
+        self.assertIn("title picks from the PR title", text)
         for group in celebrate.GROUPS:
             self.assertIn(group, text)
 
@@ -266,6 +305,9 @@ class CelebrateTest(unittest.TestCase):
         )
         self.assertIn("<title>Merge Cheer", html)
         self.assertIn("GIF on merge", html)
+        self.assertIn("random theme", html)
+        self.assertIn("random theme", readme)
+        self.assertIn("topic: title", readme)
         self.assertIn("YauhenBichel/merge-cheer@v1.1.0", html)
         self.assertIn("gifs/ship/ship-it.gif", html)
         self.assertIn("MoleCare/molecare-mcp", html)

@@ -10,9 +10,10 @@ pull request merges.
 Site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/)
 
 GIF on merge, no Giphy key, no checkout of the pull request. The action
-ships its own GIF groups and, by default, picks one from the title
-(`fix` / `feat` / `docs` / `test` / `refactor`, otherwise a general
-celebration). Pin a group with `topic` when you want one mood every time.
+ships its own GIF groups and, by default, picks a **random theme**
+(seeded by the pull request number so the same PR stays stable). Pin a
+group with `topic` when you want one mood every time. Use `topic: title`
+to pick from the title instead.
 
 ## Install
 
@@ -44,10 +45,12 @@ Pin a group:
     topic: ship   # or party, comic, sunny, game, sticker, yeah
 ```
 
-`topic` is `auto` when unset. Allowed names: `auto`, `ship`, `fix`,
-`docs`, `tests`, `cleanup`, `celebration`, `welcome`, `party`, `space`,
-`magic`, `coffee`, `robot`, `comic`, `sunny`, `game`, `sticker`, `yeah`.
-An unknown name falls back to `celebration` and prints the list.
+`topic` is `auto` when unset: a random shipped theme, then one GIF in
+that group. Different PR numbers can land on different groups. Allowed
+names: `auto`, `title`, `ship`, `fix`, `docs`, `tests`, `cleanup`,
+`celebration`, `welcome`, `party`, `space`, `magic`, `coffee`, `robot`,
+`comic`, `sunny`, `game`, `sticker`, `yeah`. An unknown name falls back
+to `celebration` and prints the list.
 
 ## Live demo
 
@@ -95,7 +98,7 @@ To be listed, merge a celebrate workflow that
 Each group is a folder of GIFs (`gifs/<group>/`). The action picks one
 file in the group (stable for a given pull request number).
 
-| `topic` | Title contains (when `auto`) | Preview |
+| `topic` | Title contains (when `topic: title`) | Preview |
 | --- | --- | --- |
 | `ship` | `feat`, `add `, `added`, `new `, `launch`, `ship:` | ![ship](gifs/ship/ship-it.gif) |
 | `fix` | `fix`, `bug`, `hotfix`, `patch` | ![fix](gifs/fix/nailed-it.gif) |
@@ -115,7 +118,7 @@ file in the group (stable for a given pull request number).
 | `sticker` | `sticker` | ![sticker](gifs/sticker/star.gif) |
 | `yeah` | `yeah`, `let's go`, `fist pump` | ![yeah](gifs/yeah/pump.gif) |
 
-`welcome` also wins on `auto` when GitHub marks the author
+`welcome` also wins on `topic: title` when GitHub marks the author
 `FIRST_TIME_CONTRIBUTOR` or `FIRST_TIMER` and the title did not match
 another group. It reuses the tests and celebration loops — no extra art.
 
@@ -134,7 +137,7 @@ Aliases: `launch` → `ship`, `nailed-it` → `fix`, `nice-work` → `docs`,
 | Input | Default | What it does |
 | --- | --- | --- |
 | `github-token` | `${{ github.token }}` | Posts the comment |
-| `topic` | `auto` | Group name, or `auto` to pick from the title |
+| `topic` | `auto` | Group name, `auto` for a random theme, or `title` to pick from the PR title |
 | `giphy-api-key` | empty | Optional. When set, try a G-rated Giphy GIF first |
 | `message` | `Merged — thank you @{author}.` | `{author}` becomes the PR author |
 | `rating` | `g` | Giphy rating when a key is set |

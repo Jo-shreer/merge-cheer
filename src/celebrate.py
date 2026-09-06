@@ -33,7 +33,7 @@ GROUPS = (
     "yeah",
 )
 
-# Extra spellings that resolve to a group. `auto` is handled separately.
+# Extra spellings that resolve to a group. `auto` and `title` are not aliases.
 ALIASES = {
     "ship": "ship",
     "launch": "ship",
@@ -155,13 +155,15 @@ _TITLE_RULES = (
 
 
 def allowed_topics() -> str:
-    return ", ".join(("auto",) + GROUPS)
+    return ", ".join(("auto", "title") + GROUPS)
 
 
 def normalize_topic(value: str) -> str:
     raw = (value or "auto").strip().lower().replace("_", "-")
     if raw in ("", "auto"):
         return "auto"
+    if raw == "title":
+        return "title"
     return ALIASES.get(raw, "")
 
 
@@ -175,10 +177,19 @@ def pick_from_title(title: str, association: str = "") -> str:
     return "celebration"
 
 
-def resolve_group(title: str, topic: str, association: str = "") -> str:
+def pick_random_group(seed: str = "") -> str:
+    """Seeded by PR number when set; otherwise the clock."""
+    return random.Random(seed or None).choice(GROUPS)
+
+
+def resolve_group(
+    title: str, topic: str, association: str = "", seed: str = ""
+) -> str:
     """Pick a group. Unknown explicit topics fall back to celebration."""
     chosen = normalize_topic(topic)
     if chosen == "auto":
+        return pick_random_group(seed)
+    if chosen == "title":
         return pick_from_title(title, association)
     if not chosen:
         print(
@@ -227,11 +238,15 @@ def normalize_ref(ref: str) -> str:
     return value
 
 
+DEFAULT_ACTION_REPO = "YauhenBichel/merge-cheer"
+
+
 def bundled_url(action_repo: str, action_ref: str, group: str, name: str) -> str:
     if not name:
         return ""
+    repo = (action_repo or "").strip() or DEFAULT_ACTION_REPO
     return (
-        f"https://raw.githubusercontent.com/{action_repo}/"
+        f"https://raw.githubusercontent.com/{repo}/"
         f"{normalize_ref(action_ref)}/gifs/{group}/{name}"
     )
 
@@ -300,7 +315,9 @@ def main() -> int:
     title = os.environ.get("PR_TITLE", "")
     topic = os.environ.get("TOPIC", "auto")
     association = os.environ.get("PR_AUTHOR_ASSOCIATION", "")
-    group = resolve_group(title, topic, association)
+    group = resolve_group(
+        title, topic, association, os.environ.get("PR_NUMBER", "")
+    )
     root = action_root()
     group, name = choose_gif(root, group, os.environ.get("PR_NUMBER", ""))
     gif = giphy_url(
