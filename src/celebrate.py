@@ -212,11 +212,11 @@ FIRST_TIMERS = frozenset({"FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"})
 # groups so "feat" / "fix" are not stolen. Keep "ship" and "space" off
 # bare substrings ("fellowship", "namespace").
 _TITLE_RULES = (
-    ("fix", ("fix", "bug", "hotfix", "patch")),
-    ("ship", ("feat", "add ", "added", "new ", "launch", "ship:", "ship ")),
+    ("fix", ("fix", "bug", "hotfix", "patch", "revert:", "revert ")),
+    ("ship", ("feat", "add ", "added", "new ", "launch", "ship:", "ship ", "perf:", "perf ")),
     ("docs", ("doc", "readme")),
     ("tests", ("test", " ci", "ci:", "ci ", "-ci")),
-    ("cleanup", ("refactor", "clean")),
+    ("cleanup", ("refactor", "clean", "deps:", "deps ")),
     ("welcome", ("welcome", "first contrib", "good first", "first-time")),
     ("party", ("party", "congrats", "woo", "hooray", "celebrate")),
     ("space", ("cosmos", "galaxy", "orbit", "planet", "outer space")),
