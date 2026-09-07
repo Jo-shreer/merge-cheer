@@ -175,6 +175,10 @@ class CelebrateTest(unittest.TestCase):
         self.assertEqual(celebrate.pick_from_title("chore: cpp: move"), "cpp")
         self.assertEqual(celebrate.pick_from_title("chore: golang gopher"), "golang")
         self.assertEqual(celebrate.pick_from_title("chore: java: streams"), "java")
+        self.assertEqual(celebrate.pick_from_title("perf: speed up query"), "ship")
+        self.assertEqual(celebrate.pick_from_title("revert: bad merge"), "fix")
+        self.assertEqual(celebrate.pick_from_title("deps: bump requests"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("docs: perfect the wording"), "docs")
 
     def test_mood_keywords_do_not_steal_conventional_types(self) -> None:
         celebrate = _load()
