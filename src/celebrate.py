@@ -832,11 +832,7 @@ def cheer_is_specific(title: str, message: str) -> bool:
     return any(token in low for token in tokens)
 
 
-<<<<<<< Updated upstream
-def _parse_model_payload(raw: str) -> tuple[str, str] | None:
-=======
 def _parse_model_payload(raw: str) -> str | None:
->>>>>>> Stashed changes
     text = (raw or "").strip()
     if not text:
         return None
@@ -870,23 +866,12 @@ def ask_model(
     if not cfg:
         return None
     key, model, base = cfg
-<<<<<<< Updated upstream
-    excerpt = (body or "")[:800]
-=======
     excerpt = (body or "")[:200]
->>>>>>> Stashed changes
     repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
     system = (
         "You write one G-rated pull-request thank-you that is about "
         "what just landed. "
-<<<<<<< Updated upstream
-        "Reply with JSON only: "
-        '{"group": "<one allowed group>", "message": "<one short line>"}. '
-        f"Allowed groups: {', '.join(GROUPS)}. "
-        "Pick the group that matches the work (docs, fix, tests, …). "
-=======
         'Reply with JSON only: {"message": "<one short line>"}. '
->>>>>>> Stashed changes
         "The message must mention something from the title. "
         "Do not write a generic thanks. "
         "Use {author} or {authors} placeholders. "
@@ -933,17 +918,8 @@ def ask_model(
     if not line or not cheer_is_specific(title, line):
         print("model skipped: generic or unsafe", file=sys.stderr)
         return None
-<<<<<<< Updated upstream
-    group, line = parsed
-    if group not in GROUPS or not cheer_is_specific(title, line):
-        print("model skipped: generic or unsafe", file=sys.stderr)
-        return None
-    print(f"model: group={group} message={line}", file=sys.stderr)
-    return group, line
-=======
     print(f"model: message={line}", file=sys.stderr)
     return line
->>>>>>> Stashed changes
 
 
 def topic_is_default(moment: str, topic: str) -> bool:

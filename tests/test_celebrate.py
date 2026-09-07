@@ -435,20 +435,14 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("id=\"gitlab\"", html)
         self.assertIn("id=\"bitbucket\"", html)
         self.assertIn("id=\"model\"", html)
-<<<<<<< Updated upstream
-=======
         self.assertIn("id=\"credits\"", html)
         self.assertIn("Keep credits low", html)
         self.assertIn("Keep credits low", readme)
->>>>>>> Stashed changes
         self.assertIn("examples/celebrate-openai.yml", html)
         self.assertIn("examples/celebrate-openai.yml", readme)
         self.assertIn("OPENAI_API_KEY", html)
         self.assertIn("e183fbc7b8e395506e627ff60600577dfb5f8f45", html)
-<<<<<<< Updated upstream
-=======
         self.assertIn("model: message=", html)
->>>>>>> Stashed changes
         self.assertIn("actions/deploy-pages", pages)
         self.assertIn("cp -R gifs _site/gifs", pages)
         medium = (ROOT / "docs" / "medium-merge-cheer.md").read_text(encoding="utf-8")
@@ -738,35 +732,12 @@ class CelebrateTest(unittest.TestCase):
                     "choices": [
                         {
                             "message": {
-                                "content": (
-                                    '{"group": "docs", "message": '
-                                    '"README now names the people — thanks {authors}."}'
-                                )
-                            }
-                        }
-                    ]
-                }
-
-<<<<<<< Updated upstream
-            celebrate._http_json = fake_ok  # type: ignore[method-assign]
-            self.assertEqual(
-                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice"),
-                ("docs", "README now names the people — thanks {authors}."),
-            )
-
-            def fake_generic(_url, _token, method="GET", payload=None, headers=None):
-                return {
-                    "choices": [
-                        {
-                            "message": {
                                 "content": '{"group": "docs", "message": "Thanks {authors}."}'
                             }
                         }
                     ]
                 }
 
-=======
->>>>>>> Stashed changes
             celebrate._http_json = fake_generic  # type: ignore[method-assign]
             self.assertIsNone(
                 celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice")

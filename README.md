@@ -73,10 +73,6 @@ pull request!*
 
 Pin that SHA until the next release. `@v1.6.0` can call a model but
 still accepts a generic thanks. A 429 or a junk reply falls back to
-<<<<<<< Updated upstream
-the stdlib line. The Action still does not check out the pull request
-head.
-=======
 the stdlib line — it is not retried. The Action still does not check
 out the pull request head.
 
@@ -87,7 +83,6 @@ from the title map (`topic: title` / `auto`). One call per merge, then
 skip if that pull request already has a cheer. Use `gpt-4o-mini`. A
 bigger model does not help one sentence. Pin `message` when you do
 not want a model call.
->>>>>>> Stashed changes
 
 Also comment when a pull request **closes without a merge**, or when a
 reviewer asks for **more work**. Tone stays kind. Copy
