@@ -832,7 +832,7 @@ def cheer_is_specific(title: str, message: str) -> bool:
     return any(token in low for token in tokens)
 
 
-def _parse_model_payload(raw: str) -> tuple[str, str] | None:
+def _parse_model_payload(raw: str) -> str | None:
     text = (raw or "").strip()
     if not text:
         return None
@@ -851,11 +851,8 @@ def _parse_model_payload(raw: str) -> tuple[str, str] | None:
             return None
     if not isinstance(data, dict):
         return None
-    group = str(data.get("group") or "").strip().lower().replace("_", "-")
     message = str(data.get("message") or "").strip()
-    if not group or not message:
-        return None
-    return group, message
+    return message or None
 
 
 def ask_model(
@@ -864,20 +861,17 @@ def ask_model(
     body: str,
     author: str,
     authors: str,
-) -> tuple[str, str] | None:
+) -> str | None:
     cfg = model_settings()
     if not cfg:
         return None
     key, model, base = cfg
-    excerpt = (body or "")[:800]
+    excerpt = (body or "")[:200]
     repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
     system = (
         "You write one G-rated pull-request thank-you that is about "
         "what just landed. "
-        "Reply with JSON only: "
-        '{"group": "<one allowed group>", "message": "<one short line>"}. '
-        f"Allowed groups: {', '.join(GROUPS)}. "
-        "Pick the group that matches the work (docs, fix, tests, …). "
+        'Reply with JSON only: {"message": "<one short line>"}. '
         "The message must mention something from the title. "
         "Do not write a generic thanks. "
         "Use {author} or {authors} placeholders. "
@@ -902,7 +896,7 @@ def ask_model(
             payload={
                 "model": model,
                 "temperature": 0.4,
-                "max_tokens": 120,
+                "max_tokens": 60,
                 "messages": [
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
@@ -920,15 +914,12 @@ def ask_model(
                 choices[0].get("message"), dict
             ) else {}
             content = str(message.get("content") or "")
-    parsed = _parse_model_payload(content)
-    if not parsed:
-        return None
-    group, line = parsed
-    if group not in GROUPS or not cheer_is_specific(title, line):
+    line = _parse_model_payload(content)
+    if not line or not cheer_is_specific(title, line):
         print("model skipped: generic or unsafe", file=sys.stderr)
         return None
-    print(f"model: group={group} message={line}", file=sys.stderr)
-    return group, line
+    print(f"model: message={line}", file=sys.stderr)
+    return line
 
 
 def topic_is_default(moment: str, topic: str) -> bool:
@@ -1158,16 +1149,10 @@ def main() -> int:
     logins = collect_authors(author, pr_body, commit_text)
     authors = format_authors(logins)
     group = resolve_group(title, topic, association, number, pr_body)
-    use_model_group = topic_is_default(moment, topic)
-    use_model_line = message_is_default(moment, message)
-    if use_model_group or use_model_line:
+    if message_is_default(moment, message):
         hinted = ask_model(moment, title, pr_body, author, authors)
         if hinted:
-            hinted_group, hinted_msg = hinted
-            if use_model_group:
-                group = hinted_group
-            if use_model_line:
-                message = hinted_msg
+            message = hinted
     root = action_root()
     group, name = choose_gif(root, group, number)
     gif = giphy_url(

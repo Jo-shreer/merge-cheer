@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import json
 import os
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -434,10 +435,14 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("id=\"gitlab\"", html)
         self.assertIn("id=\"bitbucket\"", html)
         self.assertIn("id=\"model\"", html)
+        self.assertIn("id=\"credits\"", html)
+        self.assertIn("Keep credits low", html)
+        self.assertIn("Keep credits low", readme)
         self.assertIn("examples/celebrate-openai.yml", html)
         self.assertIn("examples/celebrate-openai.yml", readme)
         self.assertIn("OPENAI_API_KEY", html)
         self.assertIn("e183fbc7b8e395506e627ff60600577dfb5f8f45", html)
+        self.assertIn("model: message=", html)
         self.assertIn("actions/deploy-pages", pages)
         self.assertIn("cp -R gifs _site/gifs", pages)
         medium = (ROOT / "docs" / "medium-merge-cheer.md").read_text(encoding="utf-8")
@@ -672,7 +677,13 @@ class CelebrateTest(unittest.TestCase):
             celebrate._parse_model_payload(
                 '{"group": "ship", "message": "Thanks {author}."}'
             ),
-            ("ship", "Thanks {author}."),
+            "Thanks {author}.",
+        )
+        self.assertEqual(
+            celebrate._parse_model_payload(
+                '{"message": "README now names the people — thanks {authors}."}'
+            ),
+            "README now names the people — thanks {authors}.",
         )
         self.assertTrue(celebrate.is_grated("Thanks {author}."))
         self.assertFalse(celebrate.is_grated("nsfw party"))
@@ -683,14 +694,16 @@ class CelebrateTest(unittest.TestCase):
         try:
             os.environ["MODEL_API_KEY"] = "sk-test"
             os.environ["MODEL"] = "gpt-4o-mini"
+            seen: list[dict] = []
 
             def fake_ok(_url, _token, method="GET", payload=None, headers=None):
+                seen.append(payload or {})
                 return {
                     "choices": [
                         {
                             "message": {
                                 "content": (
-                                    '{"group": "docs", "message": '
+                                    '{"message": '
                                     '"README now names the people — thanks {authors}."}'
                                 )
                             }
@@ -700,9 +713,19 @@ class CelebrateTest(unittest.TestCase):
 
             celebrate._http_json = fake_ok  # type: ignore[method-assign]
             self.assertEqual(
-                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice"),
-                ("docs", "README now names the people — thanks {authors}."),
+                celebrate.ask_model(
+                    "merge",
+                    "docs: readme",
+                    "x" * 400,
+                    "alice",
+                    "@alice",
+                ),
+                "README now names the people — thanks {authors}.",
             )
+            self.assertEqual(seen[0]["max_tokens"], 60)
+            self.assertNotIn("Allowed groups", seen[0]["messages"][0]["content"])
+            user = json.loads(seen[0]["messages"][1]["content"])
+            self.assertEqual(len(user["body"]), 200)
 
             def fake_generic(_url, _token, method="GET", payload=None, headers=None):
                 return {
