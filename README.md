@@ -6,7 +6,7 @@ pull request merges.
 [![CI](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml)
 [![Contributors](https://img.shields.io/github/contributors/YauhenBichel/merge-cheer)](https://github.com/YauhenBichel/merge-cheer/graphs/contributors)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.4.1-6e5494)](https://github.com/marketplace/actions/merge-cheer)
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.5.0-6e5494)](https://github.com/marketplace/actions/merge-cheer)
 [![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 Site: [yauhenbichel.github.io/merge-cheer](https://yauhenbichel.github.io/merge-cheer/) · Marketplace: [merge-cheer](https://github.com/marketplace/actions/merge-cheer)
@@ -24,7 +24,7 @@ file as the [site demo](https://yauhenbichel.github.io/merge-cheer/#demo).
 
 ## Install
 
-Pin `@v1.4.1` (current release). `@v1` is the older first release.
+Pin `@v1.5.0` (current release). `@v1` is the older first release.
 The Action never checks out the pull request head.
 
 ### GitHub
@@ -47,7 +47,7 @@ jobs:
     if: github.event.pull_request.merged && github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
-      - uses: YauhenBichel/merge-cheer@v1.4.1
+      - uses: YauhenBichel/merge-cheer@v1.5.0
 ```
 
 Also comment when a pull request **closes without a merge**, or when a
@@ -68,7 +68,7 @@ checks out the pull request head.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/YauhenBichel/merge-cheer/merge-cheer@v1.4.1
+  - component: $CI_SERVER_FQDN/YauhenBichel/merge-cheer/merge-cheer@v1.5.0
     inputs:
       topic: auto
       token: $GITLAB_TOKEN
@@ -87,20 +87,20 @@ Until the Catalog row exists, the curl job in
 
 ```yaml
 script:
-  - pipe: docker://eugenebichel/merge-cheer:1.4.1
+  - pipe: docker://eugenebichel/merge-cheer:1.5.0
     variables:
       TOPIC: auto
       BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN
 ```
 
-Until `eugenebichel/merge-cheer:1.4.1` is on Docker Hub, use the curl
+Until `eugenebichel/merge-cheer:1.5.0` is on Docker Hub, use the curl
 job in the example. A Pipes UI listing needs an Atlassian review —
 [MARKETPLACES.md](MARKETPLACES.md).
 
 Pin a group:
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1.4.1
+- uses: YauhenBichel/merge-cheer@v1.5.0
   with:
     topic: ship   # or party, comic, sunny, game, sticker, yeah
 ```
@@ -133,7 +133,7 @@ Real comments already landed on
 and
 [molecare-desktop #26](https://github.com/MoleCare/molecare-desktop/pull/26#issuecomment-5559101123).
 
-**How.** Pin `@v1.4.1` on the default branch (see [Install](#install)).
+**How.** Pin `@v1.5.0` on the default branch (see [Install](#install)).
 Leave `topic` unset (or `topic: auto`) for a random theme, seeded by the
 pull request number. Pin `topic: comic` when you want the same mood
 every time.
@@ -187,7 +187,7 @@ yet — that workflow is what will write it.
 **Personal:** [readme-contributors](https://github.com/YauhenBichel/readme-contributors).
 
 To be listed, merge a celebrate workflow that
-`uses: YauhenBichel/merge-cheer@v1.4.1` on the default branch.
+`uses: YauhenBichel/merge-cheer@v1.5.0` on the default branch.
 
 ## Topics
 
@@ -258,7 +258,7 @@ before `qa`. `feat: add python client` still ships.
 | `rating` | `g` | Giphy rating when a key is set |
 
 ```yaml
-- uses: YauhenBichel/merge-cheer@v1.4.1
+- uses: YauhenBichel/merge-cheer@v1.5.0
   with:
     topic: welcome
     giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
@@ -294,7 +294,7 @@ python3 -m unittest discover -s tests -q
 
 ## Publish a release
 
-Current release is `v1.4.1` (`@v1` is the first tag, not a floating
+Current release is `v1.5.0` (`@v1` is the first tag, not a floating
 major). Listed on the [GitHub Marketplace](https://github.com/marketplace/actions/merge-cheer).
 A reviewed Release is tests plus a human review — see [RELEASE.md](RELEASE.md).
 Pushing a tag does not publish. Later releases update the existing listing.

@@ -106,7 +106,7 @@
     <ul class="links">
       <li><a href="https://github.com/YauhenBichel/merge-cheer">GitHub repo</a></li>
       <li><a href="https://github.com/marketplace/actions/merge-cheer">GitHub Marketplace</a></li>
-      <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.4.1">Release v1.4.1</a></li>
+      <li><a href="https://github.com/YauhenBichel/merge-cheer/releases/tag/v1.5.0">Release v1.5.0</a></li>
     </ul>
 
     <h2 id="demo">Watch the demo</h2>
@@ -117,7 +117,7 @@
       <li><strong>What.</strong> Merge Cheer comments one G-rated GIF when a human pull request merges. Bots are skipped. The Action does not check out the pull request.</li>
       <li><strong>Why.</strong> The merge is the moment people actually did the work. No Giphy key. The Action ships its own loops, so it works on a new repository with the default token.</li>
       <li><strong>Where.</strong> Code is <a href="https://github.com/YauhenBichel/merge-cheer">YauhenBichel/merge-cheer</a>. Real comments already landed on <a href="https://github.com/YauhenBichel/py-harness/pull/350#issuecomment-5559092736">py-harness #350</a> and <a href="https://github.com/MoleCare/molecare-desktop/pull/26#issuecomment-5559101123">molecare-desktop #26</a>.</li>
-      <li><strong>How.</strong> Pin <code>YauhenBichel/merge-cheer@v1.4.1</code> on the default branch. Leave <code>topic</code> unset (or <code>topic: auto</code>) for a random theme, seeded by the pull request number. Pin <code>topic: comic</code> when you want the same mood every time.</li>
+      <li><strong>How.</strong> Pin <code>YauhenBichel/merge-cheer@v1.5.0</code> on the default branch. Leave <code>topic</code> unset (or <code>topic: auto</code>) for a random theme, seeded by the pull request number. Pin <code>topic: comic</code> when you want the same mood every time.</li>
     </ul>
 
     <h2>What happens on merge</h2>
@@ -150,7 +150,7 @@
     <p class="mute">Also on the Action: ship, fix, docs, tests, cleanup, celebration, welcome, party, space, magic, coffee, robot, yeah, sre, qa, design, architecture, engineering, backend, java, cpp. <code>topic: title</code> is the old picker (it reads the PR title).</p>
 
     <h2 id="install">Install</h2>
-    <p>Default is <code>topic: auto</code> — a random shipped theme, then one GIF in that group. Pin <code>@v1.4.1</code> (current release).</p>
+    <p>Default is <code>topic: auto</code> — a random shipped theme, then one GIF in that group. Pin <code>@v1.5.0</code> (current release).</p>
 
     <h3>GitHub</h3>
     <ol class="steps">
@@ -169,9 +169,9 @@ jobs:
     if: github.event.pull_request.merged &amp;&amp; github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
     steps:
-      - uses: YauhenBichel/merge-cheer@v1.4.1</pre>
+      - uses: YauhenBichel/merge-cheer@v1.5.0</pre>
     <p>Pin a theme when you want the same mood on every merge:</p>
-    <pre>- uses: YauhenBichel/merge-cheer@v1.4.1
+    <pre>- uses: YauhenBichel/merge-cheer@v1.5.0
   with:
     topic: comic   # or python, devops, sunny, game, …</pre>
     <p class="mute"><code>@v1</code> is the older first release, not a floating major. An unknown <code>topic</code> falls back to <code>celebration</code>.</p>
@@ -183,7 +183,7 @@ jobs:
       <li>Merge into the default branch. The job finds that merge request and comments the GIF.</li>
     </ol>
     <pre>include:
-  - component: $CI_SERVER_FQDN/YauhenBichel/merge-cheer/merge-cheer@v1.4.1
+  - component: $CI_SERVER_FQDN/YauhenBichel/merge-cheer/merge-cheer@v1.5.0
     inputs:
       topic: auto
       token: $GITLAB_TOKEN</pre>
@@ -196,14 +196,14 @@ jobs:
       <li>Merge a pull request. The step comments the GIF.</li>
     </ol>
     <pre>script:
-  - pipe: docker://eugenebichel/merge-cheer:1.4.1
+  - pipe: docker://eugenebichel/merge-cheer:1.5.0
     variables:
       TOPIC: auto
       BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN</pre>
     <p class="mute">Until the Docker image is public, use the curl job in the example. A <a href="https://support.atlassian.com/bitbucket-cloud/docs/what-are-pipes/">Pipes</a> UI listing needs an Atlassian review — same <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/MARKETPLACES.md">MARKETPLACES.md</a>.</p>
 
     <h2>Used by</h2>
-    <p>8 public repositories already run Merge Cheer on the default branch, pinned to <code>@v1.4.1</code>.</p>
+    <p>8 public repositories already run Merge Cheer on the default branch, pinned to <code>@v1.5.0</code>.</p>
     <p><strong>MoleCare</strong></p>
     <ul>
       <li><a href="https://github.com/MoleCare/molecare-mcp">MoleCare/molecare-mcp</a></li>
@@ -218,7 +218,7 @@ jobs:
       <li><a href="https://github.com/YauhenBichel/python-vibe">YauhenBichel/python-vibe</a></li>
       <li><a href="https://github.com/YauhenBichel/readme-contributors">YauhenBichel/readme-contributors</a></li>
     </ul>
-    <p class="mute">To be listed, merge a celebrate workflow that <code>uses: YauhenBichel/merge-cheer@v1.4.1</code> on the default branch.</p>
+    <p class="mute">To be listed, merge a celebrate workflow that <code>uses: YauhenBichel/merge-cheer@v1.5.0</code> on the default branch.</p>
 
     <footer>
       <a href="https://github.com/YauhenBichel/merge-cheer">YauhenBichel/merge-cheer</a>
