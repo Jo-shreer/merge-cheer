@@ -31,9 +31,9 @@ inputs:
     default: "Merged — thank you @{author}."
   model:
     description: >
-      Optional chat model. Empty keeps the stdlib path. Set github to
-      use GitHub Models with GITHUB_TOKEN, or an OpenAI-compatible
-      model name with model-api-key.
+      Optional chat model. Empty keeps the stdlib path. Set an
+      OpenAI-compatible model name with model-api-key. The line must
+      be about the pull request; generic thanks are ignored.
     required: false
     default: ""
   model-api-key:

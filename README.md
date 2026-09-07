@@ -18,8 +18,9 @@ group with `topic` when you want one mood every time. Use `topic: title`
 to pick from the title and body. A `no-cheer` / `skip-cheer` label (or
 the same words in the title) skips the comment. The Action thanks
 co-authors (`{authors}`) and will not post a second GIF on the same
-pull request. Set `model: github` (or an OpenAI-compatible key) for one
-G-rated thank-you line; unset keeps the stdlib path.
+pull request. Set an OpenAI-compatible `model` and `model-api-key` for
+one G-rated line about what merged; generic thanks fall back to the
+stdlib path.
 
 ![Merge Cheer demo](docs/merge-cheer-demo.mp4)
 
@@ -272,7 +273,8 @@ before `qa`. `feat: add python client` still ships.
     topic: welcome
     giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
     message: "Shipped. Thank you @{authors}."
-    # model: github
+    # model: gpt-4o-mini
+    # model-api-key: ${{ secrets.OPENAI_API_KEY }}
 ```
 
 ## Why this instead of a random Giphy Action
@@ -337,11 +339,10 @@ Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
-  <a href="https://github.com/HeaTTap" title="HeaTTap" aria-label="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
-  <a href="https://github.com/Som0111" title="Soumya Padhi" aria-label="Soumya Padhi"><img src=".github/faces/Som0111.svg" width="72" height="82" alt="Soumya Padhi" /></a>
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/HeaTTap" title="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
+  <a href="https://github.com/Som0111" title="Soumya Padhi"><img src=".github/faces/Som0111.svg" width="72" height="82" alt="Soumya Padhi" /></a>
 </p>
-<p align="center"><em>The contributors wall showcases the efforts of three dedicated individuals.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted). Live demo: [readme-contributors](https://github.com/YauhenBichel/readme-contributors#live-demo).

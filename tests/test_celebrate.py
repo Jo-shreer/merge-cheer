@@ -391,7 +391,7 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("YauhenBichel/merge-cheer@v1.6.0", html)
         self.assertIn("releases/tag/v1.6.0", html)
         self.assertIn("no-cheer", html)
-        self.assertIn("model: github", html)
+        self.assertIn("model-api-key", html)
         self.assertIn("merge-cheer-demo.mp4", html)
         self.assertIn("merge-cheer-demo-poster.png", html)
         self.assertIn("id=\"demo\"", html)
@@ -684,7 +684,10 @@ class CelebrateTest(unittest.TestCase):
                     "choices": [
                         {
                             "message": {
-                                "content": '{"group": "docs", "message": "Thanks {authors}."}'
+                                "content": (
+                                    '{"group": "docs", "message": '
+                                    '"README now names the people — thanks {authors}."}'
+                                )
                             }
                         }
                     ]
@@ -693,7 +696,31 @@ class CelebrateTest(unittest.TestCase):
             celebrate._http_json = fake_ok  # type: ignore[method-assign]
             self.assertEqual(
                 celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice"),
-                ("docs", "Thanks {authors}."),
+                ("docs", "README now names the people — thanks {authors}."),
+            )
+
+            def fake_generic(_url, _token, method="GET", payload=None, headers=None):
+                return {
+                    "choices": [
+                        {
+                            "message": {
+                                "content": '{"group": "docs", "message": "Thanks {authors}."}'
+                            }
+                        }
+                    ]
+                }
+
+            celebrate._http_json = fake_generic  # type: ignore[method-assign]
+            self.assertIsNone(
+                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice")
+            )
+            self.assertFalse(
+                celebrate.cheer_is_specific("docs: readme", "Thanks {author}.")
+            )
+            self.assertTrue(
+                celebrate.cheer_is_specific(
+                    "docs: readme", "README now names the people — thanks {authors}."
+                )
             )
 
             def fake_bad(_url, _token, method="GET", payload=None, headers=None):
