@@ -13,7 +13,7 @@ inputs:
     description: >
       GIF group. auto (default) picks a random theme, seeded by the
       pull request number so the same PR stays stable. Set a group
-      name to pin that mood. title picks from the PR title.
+      name to pin that mood. title picks from the PR title and body.
       Groups: ship, fix, docs, tests, cleanup, celebration, welcome,
       party, space, magic, coffee, robot, comic, sunny, game, sticker,
       yeah, devops, sre, qa, design, architecture, engineering,
@@ -25,8 +25,30 @@ inputs:
     required: false
     default: ""
   message:
-    description: Comment text on merge. `{author}` becomes the pull request author.
+    description: >
+      Comment text on merge. `{author}` is the pull request author.
+      `{authors}` is the author plus unique human co-authors.
     default: "Merged — thank you @{author}."
+  model:
+    description: >
+      Optional chat model. Empty keeps the stdlib path. Set github to
+      use GitHub Models with GITHUB_TOKEN, or an OpenAI-compatible
+      model name with model-api-key.
+    required: false
+    default: ""
+  model-api-key:
+    description: >
+      Optional API key for an OpenAI-compatible /chat/completions
+      endpoint. Empty skips the model unless model is github.
+    required: false
+    default: ""
+  model-base-url:
+    description: >
+      Optional OpenAI-compatible API root (no /chat/completions
+      suffix). GitHub Models is used when this is that host or
+      model is github.
+    required: false
+    default: ""
   closed-topic:
     description: GIF group when a pull request closes without a merge. Default coffee.
     default: coffee
@@ -61,6 +83,11 @@ runs:
         EVENT_NAME: ${{ github.event_name }}
         PR_MERGED: ${{ github.event.pull_request.merged }}
         PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        MODEL: ${{ inputs.model }}
+        MODEL_API_KEY: ${{ inputs.model-api-key }}
+        MODEL_BASE_URL: ${{ inputs.model-base-url }}
         PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         PR_AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
         PR_AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}

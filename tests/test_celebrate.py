@@ -313,11 +313,14 @@ class CelebrateTest(unittest.TestCase):
         )
         self.assertIn("@alice", body)
         self.assertIn("ship-it.gif", body)
+        self.assertIn("<!-- merge-cheer -->", body)
 
     def test_action_never_checkouts_the_pull_request(self) -> None:
         text = ACTION.read_text(encoding="utf-8")
         self.assertNotIn("actions/checkout", text)
         self.assertIn("PR_TITLE: ${{ github.event.pull_request.title }}", text)
+        self.assertIn("PR_BODY: ${{ github.event.pull_request.body }}", text)
+        self.assertIn("PR_LABELS:", text)
         self.assertIn("TOPIC: ${{ inputs.topic }}", text)
         self.assertNotIn(
             "${{ github.event.pull_request.title }}\n      run:",
@@ -589,6 +592,147 @@ class CelebrateTest(unittest.TestCase):
         self.assertFalse(celebrate.should_skip("fix: login"))
         self.assertFalse(celebrate.should_skip("feat: add login"))
         self.assertFalse(celebrate.should_skip(""))
+        self.assertTrue(celebrate.should_skip("fix: login", "no-cheer"))
+        self.assertTrue(celebrate.should_skip("fix: login", "docs, skip-cheer"))
+        self.assertFalse(celebrate.should_skip("fix: login", "docs, ready"))
+
+    def test_title_maps_typo_style_lint_without_stealing_feat(self) -> None:
+        celebrate = _load()
+        self.assertEqual(celebrate.pick_from_title("typo: comment"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("style: imports"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("lint: unused"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("format: black"), "cleanup")
+        self.assertEqual(celebrate.pick_from_title("feat: typo in copy"), "ship")
+        self.assertEqual(
+            celebrate.pick_from_title("chore: bump", "", "Please lint the extras."),
+            "cleanup",
+        )
+        self.assertEqual(
+            celebrate.resolve_group(
+                "chore: bump", "title", body="Please format the extras."
+            ),
+            "cleanup",
+        )
+
+    def test_coauthors_and_authors_placeholder(self) -> None:
+        celebrate = _load()
+        self.assertEqual(
+            celebrate.parse_coauthors(
+                "Thanks\n\nCo-authored-by: Bob <123+bob@users.noreply.github.com>\n"
+                "Co-authored-by: dependabot[bot] <bot@users.noreply.github.com>\n"
+            ),
+            ["bob"],
+        )
+        self.assertEqual(
+            celebrate.format_authors(["alice", "bob", "cara"]),
+            "@alice, @bob, and @cara",
+        )
+        self.assertEqual(
+            celebrate.collect_authors(
+                "alice",
+                "Co-authored-by: Bob <bob@users.noreply.github.com>",
+            ),
+            ["alice", "bob"],
+        )
+        body = celebrate.comment_body(
+            "Merged — thank you @{author}.",
+            "alice",
+            "ship it",
+            "https://example.test/ship.gif",
+            "@alice and @bob",
+        )
+        self.assertIn("@alice and @bob", body)
+        self.assertIn("<!-- merge-cheer -->", body)
+
+    def test_already_cheered_finds_the_marker(self) -> None:
+        celebrate = _load()
+        self.assertTrue(
+            celebrate.already_cheered(
+                [{"body": "<!-- merge-cheer -->\nMerged — thank you @alice.\n"}]
+            )
+        )
+        self.assertFalse(celebrate.already_cheered([{"body": "nice work"}]))
+        self.assertFalse(celebrate.already_cheered([]))
+
+    def test_model_accepts_allowed_group_and_rejects_junk(self) -> None:
+        celebrate = _load()
+        self.assertEqual(
+            celebrate._parse_model_payload(
+                '{"group": "ship", "message": "Thanks {author}."}'
+            ),
+            ("ship", "Thanks {author}."),
+        )
+        self.assertTrue(celebrate.is_grated("Thanks {author}."))
+        self.assertFalse(celebrate.is_grated("nsfw party"))
+        saved = {
+            key: os.environ.pop(key, None)
+            for key in ("MODEL", "MODEL_API_KEY", "MODEL_BASE_URL", "GITHUB_TOKEN")
+        }
+        try:
+            os.environ["MODEL_API_KEY"] = "sk-test"
+            os.environ["MODEL"] = "gpt-4o-mini"
+
+            def fake_ok(_url, _token, method="GET", payload=None, headers=None):
+                return {
+                    "choices": [
+                        {
+                            "message": {
+                                "content": '{"group": "docs", "message": "Thanks {authors}."}'
+                            }
+                        }
+                    ]
+                }
+
+            celebrate._http_json = fake_ok  # type: ignore[method-assign]
+            self.assertEqual(
+                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice"),
+                ("docs", "Thanks {authors}."),
+            )
+
+            def fake_bad(_url, _token, method="GET", payload=None, headers=None):
+                return {
+                    "choices": [
+                        {"message": {"content": '{"group": "docs", "message": "nsfw"}'}}
+                    ]
+                }
+
+            celebrate._http_json = fake_bad  # type: ignore[method-assign]
+            self.assertIsNone(
+                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice")
+            )
+
+            def fake_unknown(_url, _token, method="GET", payload=None, headers=None):
+                return {
+                    "choices": [
+                        {
+                            "message": {
+                                "content": '{"group": "nope", "message": "Thanks."}'
+                            }
+                        }
+                    ]
+                }
+
+            celebrate._http_json = fake_unknown  # type: ignore[method-assign]
+            self.assertIsNone(
+                celebrate.ask_model("merge", "docs: readme", "", "alice", "@alice")
+            )
+        finally:
+            for key, value in saved.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_explicit_topic_is_not_overridden_by_defaults(self) -> None:
+        celebrate = _load()
+        self.assertTrue(celebrate.topic_is_default("merge", "auto"))
+        self.assertTrue(celebrate.topic_is_default("closed", "coffee"))
+        self.assertFalse(celebrate.topic_is_default("merge", "ship"))
+        self.assertFalse(celebrate.topic_is_default("merge", "title"))
+        self.assertTrue(
+            celebrate.message_is_default("merge", "Merged — thank you @{author}.")
+        )
+        self.assertFalse(celebrate.message_is_default("merge", "Custom thanks"))
 
     def test_main_skips_when_title_has_no_cheer(self) -> None:
         celebrate = _load()
@@ -596,10 +740,17 @@ class CelebrateTest(unittest.TestCase):
             key: os.environ.pop(key, None)
             for key in (
                 "PR_TITLE",
+                "PR_BODY",
+                "PR_LABELS",
                 "DRY_RUN",
                 "PR_AUTHOR",
                 "PR_NUMBER",
                 "GITHUB_OUTPUT",
+                "GITHUB_REPOSITORY",
+                "GITHUB_TOKEN",
+                "MODEL",
+                "MODEL_API_KEY",
+                "MODEL_BASE_URL",
             )
         }
         try:
@@ -624,12 +775,32 @@ class CelebrateTest(unittest.TestCase):
             self.assertNotIn("Merged — thank you", buf.getvalue())
 
             os.environ["PR_TITLE"] = "fix: login"
+            os.environ["PR_LABELS"] = "no-cheer"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = celebrate.main()
+            self.assertEqual(code, 0)
+            self.assertIn("skip cheer requested", buf.getvalue())
+
+            os.environ.pop("PR_LABELS", None)
+            celebrate.list_github_comments = lambda *_a, **_k: [  # type: ignore[method-assign]
+                {"body": "<!-- merge-cheer -->\nalready\n"}
+            ]
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = celebrate.main()
+            self.assertEqual(code, 0)
+            self.assertIn("skip: already cheered", buf.getvalue())
+
+            celebrate.list_github_comments = lambda *_a, **_k: []  # type: ignore[method-assign]
+            celebrate.list_pr_commit_messages = lambda *_a, **_k: []  # type: ignore[method-assign]
             buf = io.StringIO()
             with redirect_stdout(buf):
                 code = celebrate.main()
             self.assertEqual(code, 0)
             self.assertIn("Merged — thank you @alice.", buf.getvalue())
             self.assertIn(".gif", buf.getvalue())
+            self.assertIn("<!-- merge-cheer -->", buf.getvalue())
         finally:
             for key, value in saved.items():
                 if value is None:

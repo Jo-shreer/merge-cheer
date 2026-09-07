@@ -15,7 +15,9 @@ GIF on merge, no Giphy key, no checkout of the pull request. The action
 ships its own GIF groups and, by default, picks a **random theme**
 (seeded by the pull request number so the same PR stays stable). Pin a
 group with `topic` when you want one mood every time. Use `topic: title`
-to pick from the title instead.
+to pick from the title and body. A `no-cheer` / `skip-cheer` label (or
+the same words in the title) skips the comment. The Action thanks
+co-authors and will not post a second GIF on the same pull request.
 
 ![Merge Cheer demo](docs/merge-cheer-demo.mp4)
 
@@ -200,7 +202,7 @@ file in the group (stable for a given pull request number).
 | `fix` | `fix`, `bug`, `hotfix`, `patch` | ![fix](gifs/fix/nailed-it.gif) |
 | `docs` | `doc`, `readme` | ![docs](gifs/docs/nice-work.gif) |
 | `tests` | `test`, `ci` | ![tests](gifs/tests/high-five.gif) |
-| `cleanup` | `refactor`, `clean` | ![cleanup](gifs/cleanup/cleanup.gif) |
+| `cleanup` | `refactor`, `clean`, `typo`, `style`, `lint`, `format` | ![cleanup](gifs/cleanup/cleanup.gif) |
 | `celebration` | anything else | ![celebration](gifs/celebration/celebration.gif) |
 | `welcome` | `welcome`, `good first`, first-time contributor | ![welcome](gifs/welcome/high-five.gif) |
 | `party` | `party`, `congrats`, `woo`, `hooray`, `celebrate` | ![party](gifs/party/confetti.gif) |
@@ -252,9 +254,14 @@ before `qa`. `feat: add python client` still ships.
 | Input | Default | What it does |
 | --- | --- | --- |
 | `github-token` | `${{ github.token }}` | Posts the comment |
-| `topic` | `auto` | Group name, `auto` for a random theme, or `title` to pick from the PR title |
+| `topic` | `auto` | Group name, `auto` for a random theme, or `title` to pick from the PR title and body |
 | `giphy-api-key` | empty | Optional. When set, try a G-rated Giphy GIF first |
-| `message` | `Merged — thank you @{author}.` | `{author}` becomes the PR author |
+| `message` | `Merged — thank you @{author}.` | `{author}` is the PR author; `{authors}` adds unique human co-authors |
+| `closed-topic` / `closed-message` | `coffee` / closed thanks | Used when a pull request closes without a merge |
+| `changes-topic` / `changes-message` | `yeah` / more-work line | Used when a reviewer asks for more work |
+| `model` | empty | Optional chat model. `github` uses GitHub Models with `GITHUB_TOKEN` |
+| `model-api-key` | empty | Optional OpenAI-compatible key. Unset keeps the stdlib path |
+| `model-base-url` | empty | Optional OpenAI-compatible API root |
 | `rating` | `g` | Giphy rating when a key is set |
 
 ```yaml

@@ -5,8 +5,10 @@ can still get a comment. That event has access to this repository's
 secrets. The Action therefore:
 
 - does not check out the pull request head
-- reads the title from an environment variable
+- reads the title, body, and labels from environment variables
 - only posts a comment
+- calls a model only when `model` / `model-api-key` is set; a failed
+  or unsafe reply falls back to the stdlib path
 
 ## Reporting a vulnerability
 

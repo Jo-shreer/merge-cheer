@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -216,7 +217,19 @@ _TITLE_RULES = (
     ("ship", ("feat", "add ", "added", "new ", "launch", "ship:", "ship ", "perf:", "perf ")),
     ("docs", ("doc", "readme")),
     ("tests", ("test", " ci", "ci:", "ci ", "-ci")),
-    ("cleanup", ("refactor", "clean", "deps:", "deps ")),
+    (
+        "cleanup",
+        (
+            "refactor",
+            "clean",
+            "deps:",
+            "deps ",
+            "typo",
+            "style",
+            "lint",
+            "format",
+        ),
+    ),
     ("welcome", ("welcome", "first contrib", "good first", "first-time")),
     ("party", ("party", "congrats", "woo", "hooray", "celebrate")),
     ("space", ("cosmos", "galaxy", "orbit", "planet", "outer space")),
@@ -256,11 +269,23 @@ def normalize_topic(value: str) -> str:
     return ALIASES.get(raw, "")
 
 
-def pick_from_title(title: str, association: str = "") -> str:
-    low = title.lower()
+def _first_title_match(text: str) -> str:
+    low = (text or "").lower()
+    if not low.strip():
+        return ""
     for group, words in _TITLE_RULES:
         if any(word in low for word in words):
             return group
+    return ""
+
+
+def pick_from_title(title: str, association: str = "", body: str = "") -> str:
+    matched = _first_title_match(title)
+    if matched:
+        return matched
+    matched = _first_title_match(body)
+    if matched:
+        return matched
     if association.upper() in FIRST_TIMERS:
         return "welcome"
     return "celebration"
@@ -272,14 +297,18 @@ def pick_random_group(seed: str = "") -> str:
 
 
 def resolve_group(
-    title: str, topic: str, association: str = "", seed: str = ""
+    title: str,
+    topic: str,
+    association: str = "",
+    seed: str = "",
+    body: str = "",
 ) -> str:
     """Pick a group. Unknown explicit topics fall back to celebration."""
     chosen = normalize_topic(topic)
     if chosen == "auto":
         return pick_random_group(seed)
     if chosen == "title":
-        return pick_from_title(title, association)
+        return pick_from_title(title, association, body)
     if not chosen:
         print(
             f"unknown topic {topic!r}; allowed: {allowed_topics()}",
@@ -402,13 +431,52 @@ def giphy_url(key: str, tag: str, rating: str) -> str:
     )
 
 
-def comment_body(message: str, author: str, tag: str, gif: str) -> str:
-    text = (message or "Merged — thank you @{author}.").replace("{author}", author)
+CHEER_MARKER = "<!-- merge-cheer -->"
+SKIP_LABELS = frozenset({"no-cheer", "skip-cheer"})
+_COAUTHOR_LINE = re.compile(r"(?im)^[ \t]*co-authored-by:[ \t]+(.+)$")
+_GITHUB_NOREPLY = re.compile(
+    r"(?:(?P<id>\d+)\+)?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)"
+    r"@users\.noreply\.github\.com$",
+    re.I,
+)
+_LOGIN_TOKEN = re.compile(
+    r"^@?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)\b"
+)
+GITHUB_MODELS_URL = "https://models.github.ai/inference"
+AZURE_MODELS_URL = "https://models.inference.ai.azure.com"
+_UNSAFE = (
+    "nsfw",
+    "porn",
+    "sex",
+    "nude",
+    "xxx",
+    "kill yourself",
+    "kys",
+    "suicide",
+    "slur",
+)
+
+
+def comment_body(
+    message: str,
+    author: str,
+    tag: str,
+    gif: str,
+    authors: str = "",
+) -> str:
+    who = (author or "").lstrip("@")
+    named = authors or (f"@{who}" if who else "")
+    text = message or "Merged — thank you @{author}."
+    text = text.replace("{authors}", named)
+    if "@{author}" in text:
+        text = text.replace("{author}", named.lstrip("@") if named else who)
+    else:
+        text = text.replace("{author}", who)
     if not text.endswith("\n"):
         text += "\n"
     if gif:
         text += f"\n![{tag}]({gif})\n"
-    return text
+    return f"{CHEER_MARKER}\n{text}"
 
 
 DEFAULT_MESSAGES = {
@@ -488,9 +556,95 @@ def detect_host() -> str:
 SKIP_MARKERS = ("no-cheer", "[skip cheer]")
 
 
-def should_skip(title: str) -> bool:
+def parse_labels(raw: str) -> list[str]:
+    names: list[str] = []
+    for part in (raw or "").replace("\n", ",").split(","):
+        name = part.strip()
+        if name:
+            names.append(name)
+    return names
+
+
+def should_skip(title: str, labels: str = "") -> bool:
     low = (title or "").lower()
-    return any(marker in low for marker in SKIP_MARKERS)
+    if any(marker in low for marker in SKIP_MARKERS):
+        return True
+    return any(name.lower() in SKIP_LABELS for name in parse_labels(labels))
+
+
+def parse_coauthors(*texts: str) -> list[str]:
+    found: list[str] = []
+    seen: set[str] = set()
+    blob = "\n".join(text or "" for text in texts)
+    for match in _COAUTHOR_LINE.finditer(blob):
+        login = _coauthor_login(match.group(1))
+        key = login.lower()
+        if not login or key in seen or is_bot_author(login):
+            continue
+        seen.add(key)
+        found.append(login)
+    return found
+
+
+def _coauthor_login(rest: str) -> str:
+    raw = (rest or "").strip()
+    name_part = raw.split("<", 1)[0].strip()
+    if is_bot_author(name_part):
+        return ""
+    email_match = re.search(r"<([^>]+)>", raw)
+    if email_match:
+        email = email_match.group(1).strip()
+        noreply = _GITHUB_NOREPLY.search(email)
+        if noreply:
+            return noreply.group("login")
+        return ""
+    token = _LOGIN_TOKEN.match(raw)
+    return token.group("login") if token else ""
+
+
+def format_authors(logins: list[str]) -> str:
+    tagged = [f"@{login.lstrip('@')}" for login in logins if login.strip()]
+    if not tagged:
+        return ""
+    if len(tagged) == 1:
+        return tagged[0]
+    if len(tagged) == 2:
+        return f"{tagged[0]} and {tagged[1]}"
+    return f"{', '.join(tagged[:-1])}, and {tagged[-1]}"
+
+
+def collect_authors(author: str, *texts: str) -> list[str]:
+    people: list[str] = []
+    seen: set[str] = set()
+
+    def add(login: str) -> None:
+        name = (login or "").strip().lstrip("@")
+        key = name.lower()
+        if not name or key in seen or is_bot_author(name):
+            return
+        seen.add(key)
+        people.append(name)
+
+    add(author)
+    for login in parse_coauthors(*texts):
+        add(login)
+    return people
+
+
+def already_cheered(comments: object) -> bool:
+    if not isinstance(comments, list):
+        return False
+    for item in comments:
+        if isinstance(item, dict) and CHEER_MARKER in str(item.get("body") or ""):
+            return True
+    return False
+
+
+def is_grated(text: str) -> bool:
+    low = (text or "").lower()
+    if not low.strip():
+        return False
+    return not any(word in low for word in _UNSAFE)
 
 
 def is_bot_author(author: str, kind: str = "") -> bool:
@@ -532,6 +686,15 @@ def _http_json(
         return json.loads(raw)
 
 
+def _github_headers(token: str) -> dict[str, str]:
+    return {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "User-Agent": "merge-cheer",
+        "Content-Type": "application/json",
+    }
+
+
 def post_github_comment(token: str, repo: str, number: str, body: str) -> None:
     if not token or not repo or not number:
         raise SystemExit("GITHUB_TOKEN, GITHUB_REPOSITORY, and PR_NUMBER are required")
@@ -540,13 +703,172 @@ def post_github_comment(token: str, repo: str, number: str, body: str) -> None:
         token,
         method="POST",
         payload={"body": body},
-        headers={
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {token}",
-            "User-Agent": "merge-cheer",
-            "Content-Type": "application/json",
-        },
+        headers=_github_headers(token),
     )
+
+
+def list_github_comments(token: str, repo: str, number: str) -> list:
+    if not token or not repo or not number:
+        return []
+    try:
+        data = _http_json(
+            f"https://api.github.com/repos/{repo}/issues/{number}/comments?per_page=100",
+            token,
+            headers=_github_headers(token),
+        )
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        print(f"comments lookup skipped: {exc}", file=sys.stderr)
+        return []
+    return data if isinstance(data, list) else []
+
+
+def list_pr_commit_messages(token: str, repo: str, number: str) -> list[str]:
+    if not token or not repo or not number:
+        return []
+    try:
+        data = _http_json(
+            f"https://api.github.com/repos/{repo}/pulls/{number}/commits?per_page=100",
+            token,
+            headers=_github_headers(token),
+        )
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        print(f"commits lookup skipped: {exc}", file=sys.stderr)
+        return []
+    if not isinstance(data, list):
+        return []
+    messages: list[str] = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        commit = row.get("commit")
+        if isinstance(commit, dict) and commit.get("message"):
+            messages.append(str(commit["message"]))
+    return messages
+
+
+def model_settings() -> tuple[str, str, str] | None:
+    """Return (api_key, model, base_url) when a model call is allowed."""
+    name = os.environ.get("MODEL", "").strip()
+    key = os.environ.get("MODEL_API_KEY", "").strip()
+    base = os.environ.get("MODEL_BASE_URL", "").strip().rstrip("/")
+    token = os.environ.get("GITHUB_TOKEN", "").strip()
+    low = name.lower()
+    githubish = (
+        "models.github.ai" in base
+        or "models.inference.ai.azure.com" in base
+        or low in {"github", "github-models"}
+    )
+    if githubish:
+        if not (key or token):
+            return None
+        model = name if name and low not in {"github", "github-models"} else "openai/gpt-4o-mini"
+        return (key or token, model, base or GITHUB_MODELS_URL)
+    if not key:
+        return None
+    return (key, name or "gpt-4o-mini", base or "https://api.openai.com/v1")
+
+
+def _parse_model_payload(raw: str) -> tuple[str, str] | None:
+    text = (raw or "").strip()
+    if not text:
+        return None
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", text, re.S)
+        if not match:
+            return None
+        try:
+            data = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return None
+    if not isinstance(data, dict):
+        return None
+    group = str(data.get("group") or "").strip().lower().replace("_", "-")
+    message = str(data.get("message") or "").strip()
+    if not group or not message:
+        return None
+    return group, message
+
+
+def ask_model(
+    moment: str,
+    title: str,
+    body: str,
+    author: str,
+    authors: str,
+) -> tuple[str, str] | None:
+    cfg = model_settings()
+    if not cfg:
+        return None
+    key, model, base = cfg
+    excerpt = (body or "")[:800]
+    system = (
+        "You write G-rated pull-request thank-yous. "
+        "Reply with JSON only: "
+        '{"group": "<one allowed group>", "message": "<one short line>"}. '
+        f"Allowed groups: {', '.join(GROUPS)}. "
+        "Use {author} or {authors} placeholders. "
+        "No slurs, no adult content, no violence."
+    )
+    user = json.dumps(
+        {
+            "moment": moment,
+            "title": title,
+            "body": excerpt,
+            "author": author,
+            "authors": authors,
+        }
+    )
+    url = f"{base.rstrip('/')}/chat/completions"
+    try:
+        data = _http_json(
+            url,
+            key,
+            method="POST",
+            payload={
+                "model": model,
+                "temperature": 0.4,
+                "max_tokens": 120,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+            },
+        )
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        print(f"model skipped: {exc}", file=sys.stderr)
+        return None
+    content = ""
+    if isinstance(data, dict):
+        choices = data.get("choices") or []
+        if choices and isinstance(choices[0], dict):
+            message = (choices[0].get("message") or {}) if isinstance(
+                choices[0].get("message"), dict
+            ) else {}
+            content = str(message.get("content") or "")
+    parsed = _parse_model_payload(content)
+    if not parsed:
+        return None
+    group, line = parsed
+    if group not in GROUPS or not is_grated(line):
+        return None
+    return group, line
+
+
+def topic_is_default(moment: str, topic: str) -> bool:
+    chosen = normalize_topic(topic)
+    if chosen in {"", "auto"}:
+        return True
+    default = normalize_topic(DEFAULT_TOPICS.get(moment, "auto"))
+    return moment != "merge" and chosen == default
+
+
+def message_is_default(moment: str, message: str) -> bool:
+    return (message or "").strip() == DEFAULT_MESSAGES.get(moment, "")
 
 
 def gitlab_headers(token: str) -> dict[str, str]:
@@ -619,6 +941,7 @@ def lookup_gitlab_mr(token: str) -> dict[str, str]:
         "number": str(data.get("iid") or iid),
         "title": str(data.get("title") or ""),
         "author": str(user.get("username") or ""),
+        "body": str(data.get("description") or ""),
         "association": "FIRST_TIME_CONTRIBUTOR"
         if data.get("first_contribution")
         else "",
@@ -670,6 +993,7 @@ def lookup_bitbucket_pr(token: str) -> dict[str, str]:
         "number": str(data.get("id") or number),
         "title": str(data.get("title") or ""),
         "author": str(author),
+        "body": str(data.get("description") or ""),
         "association": "",
     }
 
@@ -689,10 +1013,14 @@ def write_output(path: str, values: dict[str, str]) -> None:
 def main() -> int:
     host = detect_host()
     title = os.environ.get("PR_TITLE", "")
+    pr_body = os.environ.get("PR_BODY", "")
+    labels = os.environ.get("PR_LABELS", "")
     topic = os.environ.get("TOPIC", "auto")
     association = os.environ.get("PR_AUTHOR_ASSOCIATION", "")
     author = os.environ.get("PR_AUTHOR", "").strip()
     number = os.environ.get("PR_NUMBER", "").strip()
+    token = os.environ.get("GITHUB_TOKEN", "").strip()
+    repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
     if host == "gitlab" and not number:
         found = lookup_gitlab_mr(
             (
@@ -705,6 +1033,7 @@ def main() -> int:
         author = author or found.get("author", "")
         number = found.get("number", "")
         association = association or found.get("association", "")
+        pr_body = pr_body or found.get("body", "")
     if host == "bitbucket" and not number:
         found = lookup_bitbucket_pr(
             os.environ.get("BITBUCKET_ACCESS_TOKEN", "").strip()
@@ -712,6 +1041,7 @@ def main() -> int:
         title = title or found.get("title", "")
         author = author or found.get("author", "")
         number = found.get("number", "")
+        pr_body = pr_body or found.get("body", "")
     moment = detect_moment(
         os.environ.get("EVENT_NAME", ""),
         os.environ.get("PR_MERGED", ""),
@@ -732,8 +1062,11 @@ def main() -> int:
     if host in {"gitlab", "bitbucket"} and not number:
         print("skip: no merged merge request")
         return 0
-    if should_skip(title):
+    if should_skip(title, labels):
         print("skip cheer requested")
+        return 0
+    if host == "github" and already_cheered(list_github_comments(token, repo, number)):
+        print("skip: already cheered")
         return 0
     topic = moment_topic(
         moment,
@@ -747,7 +1080,22 @@ def main() -> int:
         os.environ.get("CLOSED_MESSAGE", ""),
         os.environ.get("CHANGES_MESSAGE", ""),
     )
-    group = resolve_group(title, topic, association, number)
+    commit_text = ""
+    if host == "github":
+        commit_text = "\n".join(list_pr_commit_messages(token, repo, number))
+    logins = collect_authors(author, pr_body, commit_text)
+    authors = format_authors(logins)
+    group = resolve_group(title, topic, association, number, pr_body)
+    use_model_group = topic_is_default(moment, topic)
+    use_model_line = message_is_default(moment, message)
+    if use_model_group or use_model_line:
+        hinted = ask_model(moment, title, pr_body, author, authors)
+        if hinted:
+            hinted_group, hinted_msg = hinted
+            if use_model_group:
+                group = hinted_group
+            if use_model_line:
+                message = hinted_msg
     root = action_root()
     group, name = choose_gif(root, group, number)
     gif = giphy_url(
@@ -763,7 +1111,7 @@ def main() -> int:
             name,
         )
     label = LABEL[group]
-    body = comment_body(message, author, label, gif)
+    body = comment_body(message, author, label, gif, authors)
     write_output(
         os.environ.get("GITHUB_OUTPUT", ""),
         {
