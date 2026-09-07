@@ -73,8 +73,21 @@ pull request!*
 
 Pin that SHA until the next release. `@v1.6.0` can call a model but
 still accepts a generic thanks. A 429 or a junk reply falls back to
+<<<<<<< Updated upstream
 the stdlib line. The Action still does not check out the pull request
 head.
+=======
+the stdlib line — it is not retried. The Action still does not check
+out the pull request head.
+
+### Keep credits low
+
+The model writes only the thank-you line. The GIF group still comes
+from the title map (`topic: title` / `auto`). One call per merge, then
+skip if that pull request already has a cheer. Use `gpt-4o-mini`. A
+bigger model does not help one sentence. Pin `message` when you do
+not want a model call.
+>>>>>>> Stashed changes
 
 Also comment when a pull request **closes without a merge**, or when a
 reviewer asks for **more work**. Tone stays kind. Copy
@@ -283,7 +296,7 @@ before `qa`. `feat: add python client` still ships.
 | `message` | `Merged — thank you @{author}.` | `{author}` is the PR author; `{authors}` adds unique human co-authors |
 | `closed-topic` / `closed-message` | `coffee` / closed thanks | Used when a pull request closes without a merge |
 | `changes-topic` / `changes-message` | `yeah` / more-work line | Used when a reviewer asks for more work |
-| `model` | empty | Optional chat model. `github` uses GitHub Models with `GITHUB_TOKEN` |
+| `model` | empty | Optional chat model for the thank-you line only. GIF group stays from the title map |
 | `model-api-key` | empty | Optional OpenAI-compatible key. Unset keeps the stdlib path |
 | `model-base-url` | empty | Optional OpenAI-compatible API root |
 | `rating` | `g` | Giphy rating when a key is set |
