@@ -4,6 +4,7 @@ Zero-config GitHub Action that comments a G-rated celebration GIF when a
 pull request merges.
 
 [![CI](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/merge-cheer/actions/workflows/ci.yml)
+[![Contributors](https://img.shields.io/github/contributors/YauhenBichel/merge-cheer)](https://github.com/YauhenBichel/merge-cheer/graphs/contributors)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.4.1-6e5494)](https://github.com/marketplace/actions/merge-cheer)
 [![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
