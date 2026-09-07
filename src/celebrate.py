@@ -411,6 +411,70 @@ def comment_body(message: str, author: str, tag: str, gif: str) -> str:
     return text
 
 
+DEFAULT_MESSAGES = {
+    "merge": "Merged — thank you @{author}.",
+    "closed": "Closed — thank you for the work @{author}.",
+    "changes": "A bit more work — you have this @{author}.",
+}
+
+DEFAULT_TOPICS = {
+    "merge": "auto",
+    "closed": "coffee",
+    "changes": "yeah",
+}
+
+
+def _flag(raw: str) -> bool:
+    return (raw or "").strip().lower() in {"1", "true", "yes"}
+
+
+def detect_moment(
+    event_name: str = "",
+    merged: str = "",
+    review_state: str = "",
+) -> str | None:
+    """Which comment to post. None means skip (approve, comment, …)."""
+    state = (review_state or "").strip().lower()
+    if state:
+        if state == "changes_requested":
+            return "changes"
+        return None
+    name = (event_name or "").strip().lower()
+    if _flag(merged):
+        return "merge"
+    if name in {"", "pull_request", "pull_request_target"}:
+        if name == "" and merged == "":
+            return "merge"
+        return "closed"
+    return None
+
+
+def moment_topic(
+    moment: str,
+    topic: str = "auto",
+    closed_topic: str = "",
+    changes_topic: str = "",
+) -> str:
+    if moment == "closed":
+        return (closed_topic or "").strip() or DEFAULT_TOPICS["closed"]
+    if moment == "changes":
+        return (changes_topic or "").strip() or DEFAULT_TOPICS["changes"]
+    return (topic or "").strip() or DEFAULT_TOPICS["merge"]
+
+
+def moment_message(
+    moment: str,
+    message: str = "",
+    closed_message: str = "",
+    changes_message: str = "",
+) -> str:
+    if moment == "closed":
+        return (closed_message or "").strip() or DEFAULT_MESSAGES["closed"]
+    if moment == "changes":
+        return (changes_message or "").strip() or DEFAULT_MESSAGES["changes"]
+    return (message or "").strip() or DEFAULT_MESSAGES["merge"]
+
+
 def detect_host() -> str:
     if os.environ.get("GITHUB_ACTIONS") == "true":
         return "github"
@@ -648,8 +712,22 @@ def main() -> int:
         title = title or found.get("title", "")
         author = author or found.get("author", "")
         number = found.get("number", "")
+    moment = detect_moment(
+        os.environ.get("EVENT_NAME", ""),
+        os.environ.get("PR_MERGED", ""),
+        os.environ.get("REVIEW_STATE", ""),
+    )
+    if moment is None:
+        print("skip: not a cheer moment")
+        return 0
     if is_bot_author(author, os.environ.get("PR_AUTHOR_TYPE", "")):
         print("skip bot author")
+        return 0
+    if moment == "changes" and is_bot_author(
+        os.environ.get("REVIEW_AUTHOR", ""),
+        os.environ.get("REVIEW_AUTHOR_TYPE", ""),
+    ):
+        print("skip bot reviewer")
         return 0
     if host in {"gitlab", "bitbucket"} and not number:
         print("skip: no merged merge request")
@@ -657,6 +735,18 @@ def main() -> int:
     if should_skip(title):
         print("skip cheer requested")
         return 0
+    topic = moment_topic(
+        moment,
+        topic,
+        os.environ.get("CLOSED_TOPIC", ""),
+        os.environ.get("CHANGES_TOPIC", ""),
+    )
+    message = moment_message(
+        moment,
+        os.environ.get("MESSAGE", ""),
+        os.environ.get("CLOSED_MESSAGE", ""),
+        os.environ.get("CHANGES_MESSAGE", ""),
+    )
     group = resolve_group(title, topic, association, number)
     root = action_root()
     group, name = choose_gif(root, group, number)
@@ -673,7 +763,7 @@ def main() -> int:
             name,
         )
     label = LABEL[group]
-    body = comment_body(os.environ.get("MESSAGE", ""), author, label, gif)
+    body = comment_body(message, author, label, gif)
     write_output(
         os.environ.get("GITHUB_OUTPUT", ""),
         {

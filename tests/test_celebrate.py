@@ -606,7 +606,6 @@ class CelebrateTest(unittest.TestCase):
             os.environ["PR_AUTHOR"] = "alice"
             os.environ["PR_NUMBER"] = "1"
 
-            # Case 1: no-cheer: bump lockfile does not build a comment
             os.environ["PR_TITLE"] = "no-cheer: bump lockfile"
             buf = io.StringIO()
             with redirect_stdout(buf):
@@ -615,7 +614,6 @@ class CelebrateTest(unittest.TestCase):
             self.assertIn("skip cheer requested", buf.getvalue())
             self.assertNotIn("Merged — thank you", buf.getvalue())
 
-            # Case 2: [skip cheer] fix login does not build a comment
             os.environ["PR_TITLE"] = "[skip cheer] fix login"
             buf = io.StringIO()
             with redirect_stdout(buf):
@@ -624,7 +622,6 @@ class CelebrateTest(unittest.TestCase):
             self.assertIn("skip cheer requested", buf.getvalue())
             self.assertNotIn("Merged — thank you", buf.getvalue())
 
-            # Case 3: normal fix: login still gets a GIF
             os.environ["PR_TITLE"] = "fix: login"
             buf = io.StringIO()
             with redirect_stdout(buf):

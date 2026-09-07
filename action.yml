@@ -25,8 +25,20 @@ inputs:
     required: false
     default: ""
   message:
-    description: Comment text. `{author}` becomes the pull request author.
+    description: Comment text on merge. `{author}` becomes the pull request author.
     default: "Merged — thank you @{author}."
+  closed-topic:
+    description: GIF group when a pull request closes without a merge. Default coffee.
+    default: coffee
+  closed-message:
+    description: Comment text when a pull request closes without a merge.
+    default: "Closed — thank you for the work @{author}."
+  changes-topic:
+    description: GIF group when a reviewer asks for more work. Default yeah.
+    default: yeah
+  changes-message:
+    description: Comment text when a reviewer asks for more work.
+    default: "A bit more work — you have this @{author}."
   rating:
     description: Giphy content rating when a key is set.
     default: "g"
@@ -42,10 +54,20 @@ runs:
         GIPHY_RATING: ${{ inputs.rating }}
         MESSAGE: ${{ inputs.message }}
         TOPIC: ${{ inputs.topic }}
+        CLOSED_TOPIC: ${{ inputs.closed-topic }}
+        CLOSED_MESSAGE: ${{ inputs.closed-message }}
+        CHANGES_TOPIC: ${{ inputs.changes-topic }}
+        CHANGES_MESSAGE: ${{ inputs.changes-message }}
+        EVENT_NAME: ${{ github.event_name }}
+        PR_MERGED: ${{ github.event.pull_request.merged }}
         PR_TITLE: ${{ github.event.pull_request.title }}
         PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        PR_AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
         PR_AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
+        REVIEW_STATE: ${{ github.event.review.state }}
+        REVIEW_AUTHOR: ${{ github.event.review.user.login }}
+        REVIEW_AUTHOR_TYPE: ${{ github.event.review.user.type }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         ACTION_REPO: ${{ github.action_repository }}
         ACTION_REF: ${{ github.action_ref }}

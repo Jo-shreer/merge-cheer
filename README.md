@@ -50,6 +50,12 @@ jobs:
       - uses: YauhenBichel/merge-cheer@v1.4.1
 ```
 
+Also comment when a pull request **closes without a merge**, or when a
+reviewer asks for **more work**. Tone stays kind. Copy
+[examples/celebrate-more.yml](examples/celebrate-more.yml). Close uses
+the `coffee` group. A changes request uses `yeah`. The Action never
+checks out the pull request head.
+
 ### GitLab
 
 1. Copy [examples/gitlab-ci.yml](examples/gitlab-ci.yml) onto the default
