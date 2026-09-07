@@ -30,6 +30,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           format: html
+          caption: auto
+          model: gpt-4o-mini
+          model-api-key: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Push the list
         env:
