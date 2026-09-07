@@ -368,6 +368,8 @@ class CelebrateTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("uses: ./", dogfood)
+        self.assertIn("model: gpt-4o-mini", dogfood)
+        self.assertIn("secrets.OPENAI_API_KEY", dogfood)
         self.assertIn("github.event.repository.default_branch", dogfood)
         self.assertNotIn("pull_request.head", dogfood)
 
@@ -494,6 +496,8 @@ class CelebrateTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("format: html", text)
+        self.assertIn("caption: auto", text)
+        self.assertIn("secrets.OPENAI_API_KEY", text)
         forbidden = {"README", "readme.md", ".github/contributors.svg"}
         added: list[str] = []
         for line in text.splitlines():
@@ -512,6 +516,7 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("docs/contributors", text)
         self.assertIn("gh pr create", text)
         self.assertIn("gh pr merge", text)
+        self.assertIn('gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash', text)
         self.assertNotIn("--jq .number", text)
         self.assertNotIn(
             "GitHub Actions is not permitted to create or approve pull requests",
