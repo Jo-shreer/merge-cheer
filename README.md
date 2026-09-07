@@ -55,6 +55,27 @@ jobs:
       - uses: YauhenBichel/merge-cheer@v1.6.0
 ```
 
+### Use a model
+
+Zero-config stays `Merged — thank you @author`. Add repository secret
+`OPENAI_API_KEY` and copy
+[examples/celebrate-openai.yml](examples/celebrate-openai.yml). Live
+demo: [merge-cheer #53](https://github.com/YauhenBichel/merge-cheer/pull/53#issuecomment-5574024316)
+—*Cheers to YauhenBichel for keeping model cheers that are about the
+pull request!*
+
+```yaml
+- uses: YauhenBichel/merge-cheer@e183fbc7b8e395506e627ff60600577dfb5f8f45
+  with:
+    model: gpt-4o-mini
+    model-api-key: ${{ secrets.OPENAI_API_KEY }}
+```
+
+Pin that SHA until the next release. `@v1.6.0` can call a model but
+still accepts a generic thanks. A 429 or a junk reply falls back to
+the stdlib line. The Action still does not check out the pull request
+head.
+
 Also comment when a pull request **closes without a merge**, or when a
 reviewer asks for **more work**. Tone stays kind. Copy
 [examples/celebrate-more.yml](examples/celebrate-more.yml). Close uses
@@ -339,11 +360,10 @@ Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
-  <a href="https://github.com/HeaTTap" title="HeaTTap" aria-label="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
-  <a href="https://github.com/Som0111" title="Soumya Padhi" aria-label="Soumya Padhi"><img src=".github/faces/Som0111.svg" width="72" height="82" alt="Soumya Padhi" /></a>
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/HeaTTap" title="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
+  <a href="https://github.com/Som0111" title="Soumya Padhi"><img src=".github/faces/Som0111.svg" width="72" height="82" alt="Soumya Padhi" /></a>
 </p>
-<p align="center"><em>Three contributors proudly display their achievements on the wall.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted). Live demo: [readme-contributors](https://github.com/YauhenBichel/readme-contributors#live-demo).
