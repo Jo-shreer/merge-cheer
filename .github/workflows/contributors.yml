@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: true
 
-      - uses: YauhenBichel/readme-contributors@dd5eb5b4251b0158662457256ca29c0de1e5444c # v1.5.0
+      - uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           format: html
@@ -50,9 +50,10 @@ jobs:
           git push --force --set-upstream origin docs/contributors
           NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           if [ -z "$NUMBER" ]; then
-            NUMBER="$(gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
+            # Runner gh cannot take --json on `pr create`. Print the URL, then read the number.
+            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
               --title "docs: refresh README contributors" \
-              --body "Filled by readme-contributors so the wall stays current." \
-              --json number --jq .number)"
+              --body "Filled by readme-contributors so the wall stays current."
+            NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           fi
           gh pr merge "$NUMBER" --squash --auto
