@@ -28,7 +28,7 @@ git push origin v1.2.0
 ```
 
 `v1` is the first tag on this repository, not a floating major this
-workflow maintains. Consumers may keep `uses: YauhenBichel/merge-cheer@v1.5.0`
+workflow maintains. Consumers may keep `uses: YauhenBichel/merge-cheer@v1`
 only if a human later chooses to move that tag. Never `git tag -f v1`
 from automation.
 

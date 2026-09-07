@@ -2,7 +2,9 @@ name: Celebrate merge
 
 # Live demo in the wild: GIF on merge, on close, and when a
 # reviewer asks for more work. Checkout is the default branch
-# only — never the pull request head.
+# only — never the pull request head. A no-cheer / skip-cheer
+# label skips the comment. A second run on the same PR does not
+# post another GIF.
 on:
   pull_request_target:
     types: [closed]
