@@ -50,7 +50,7 @@ Listing: https://github.com/marketplace/actions/merge-cheer
 
 The first publish is a browser + 2FA step (no API). Prefer:
 
-https://github.com/YauhenBichel/merge-cheer/releases/edit/v1.5.0?marketplace=true
+https://github.com/YauhenBichel/merge-cheer/releases/edit/v1.6.0?marketplace=true
 
 Later reviewed Releases update that listing automatically once it exists.
 
