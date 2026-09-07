@@ -319,6 +319,10 @@ See [NOTICE](NOTICE).
 Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
+<p align="center">
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/Som0111" title="Soumya Padhi"><img src=".github/faces/Som0111.svg" width="66" height="75" alt="Soumya Padhi" /></a>
+</p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted). Live demo: [readme-contributors](https://github.com/YauhenBichel/readme-contributors#live-demo).
