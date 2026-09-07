@@ -768,6 +768,70 @@ def model_settings() -> tuple[str, str, str] | None:
     return (key, name or "gpt-4o-mini", base or "https://api.openai.com/v1")
 
 
+_GENERIC_CHEER = re.compile(
+    r"^(?:(?:merged\s*[—\-]?\s*)?thank(?:s| you)"
+    r"(?:\s+for(?:\s+the)?\s+(?:work|pr|help))?|thanks?)"
+    r"[\s.,!]*"
+    r"(?:\{authors?\}|@\{author\}|@\w+)?"
+    r"[\s.,!]*$",
+    re.I,
+)
+_TITLE_STOP = frozenset(
+    {
+        "a",
+        "an",
+        "and",
+        "the",
+        "for",
+        "from",
+        "with",
+        "this",
+        "that",
+        "into",
+        "onto",
+        "chore",
+        "docs",
+        "doc",
+        "feat",
+        "fix",
+        "ci",
+        "test",
+        "tests",
+        "merge",
+        "merged",
+        "pr",
+        "pull",
+        "request",
+        "add",
+        "added",
+        "update",
+        "updated",
+        "bump",
+    }
+)
+
+
+def title_tokens(title: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]{4,}", (title or "").lower())
+    return {word for word in words if word not in _TITLE_STOP}
+
+
+def cheer_is_specific(title: str, message: str) -> bool:
+    line = (message or "").strip()
+    if not is_grated(line):
+        return False
+    if any(line.lower() == default.lower() for default in DEFAULT_MESSAGES.values()):
+        return False
+    stripped = re.sub(r"\{authors?\}|@\{author\}", "", line).strip()
+    if _GENERIC_CHEER.match(line) or _GENERIC_CHEER.match(stripped):
+        return False
+    tokens = title_tokens(title)
+    if not tokens:
+        return True
+    low = line.lower()
+    return any(token in low for token in tokens)
+
+
 def _parse_model_payload(raw: str) -> tuple[str, str] | None:
     text = (raw or "").strip()
     if not text:
@@ -806,17 +870,23 @@ def ask_model(
         return None
     key, model, base = cfg
     excerpt = (body or "")[:800]
+    repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
     system = (
-        "You write G-rated pull-request thank-yous. "
+        "You write one G-rated pull-request thank-you that is about "
+        "what just landed. "
         "Reply with JSON only: "
         '{"group": "<one allowed group>", "message": "<one short line>"}. '
         f"Allowed groups: {', '.join(GROUPS)}. "
+        "Pick the group that matches the work (docs, fix, tests, …). "
+        "The message must mention something from the title. "
+        "Do not write a generic thanks. "
         "Use {author} or {authors} placeholders. "
         "No slurs, no adult content, no violence."
     )
     user = json.dumps(
         {
             "moment": moment,
+            "repository": repo,
             "title": title,
             "body": excerpt,
             "author": author,
@@ -854,8 +924,10 @@ def ask_model(
     if not parsed:
         return None
     group, line = parsed
-    if group not in GROUPS or not is_grated(line):
+    if group not in GROUPS or not cheer_is_specific(title, line):
+        print("model skipped: generic or unsafe", file=sys.stderr)
         return None
+    print(f"model: group={group} message={line}", file=sys.stderr)
     return group, line
 
 
