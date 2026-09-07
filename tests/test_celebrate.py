@@ -506,17 +506,11 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("pull-requests: write", text)
         self.assertIn("docs/contributors", text)
         self.assertIn("gh pr create", text)
-        self.assertIn(
+        self.assertIn("gh pr merge", text)
+        self.assertNotIn(
             "GitHub Actions is not permitted to create or approve pull requests",
             text,
         )
-        self.assertIn(
-            "https://github.com/YauhenBichel/merge-cheer/compare/main...docs/contributors",
-            text,
-        )
-        self.assertIn("exit 0", text)
-        self.assertIn("exit 1", text)
-        self.assertNotIn("git push\n", text)
 
     def test_bundled_gif_names_match_the_repo(self) -> None:
         celebrate = _load()
