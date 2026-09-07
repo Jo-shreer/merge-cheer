@@ -485,6 +485,14 @@ def detect_host() -> str:
     return "github"
 
 
+SKIP_MARKERS = ("no-cheer", "[skip cheer]")
+
+
+def should_skip(title: str) -> bool:
+    low = (title or "").lower()
+    return any(marker in low for marker in SKIP_MARKERS)
+
+
 def is_bot_author(author: str, kind: str = "") -> bool:
     if (kind or "").lower() == "bot":
         return True
@@ -723,6 +731,9 @@ def main() -> int:
         return 0
     if host in {"gitlab", "bitbucket"} and not number:
         print("skip: no merged merge request")
+        return 0
+    if should_skip(title):
+        print("skip cheer requested")
         return 0
     topic = moment_topic(
         moment,
