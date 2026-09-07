@@ -6,7 +6,7 @@ import importlib.util
 import io
 import os
 import unittest
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -578,6 +578,66 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("celebrate.py", example_gl)
         self.assertIn("BITBUCKET_ACCESS_TOKEN", example_bb)
         self.assertIn("GITLAB_TOKEN", (ROOT / "README.md").read_text(encoding="utf-8"))
+
+    def test_should_skip_detects_skip_markers(self) -> None:
+        celebrate = _load()
+        self.assertTrue(celebrate.should_skip("no-cheer: bump lockfile"))
+        self.assertTrue(celebrate.should_skip("[skip cheer] fix login"))
+        self.assertTrue(celebrate.should_skip("[SKIP CHEER] fix login"))
+        self.assertTrue(celebrate.should_skip("chore: bump deps (no-cheer)"))
+        self.assertFalse(celebrate.should_skip("fix: login"))
+        self.assertFalse(celebrate.should_skip("feat: add login"))
+        self.assertFalse(celebrate.should_skip(""))
+
+    def test_main_skips_when_title_has_no_cheer(self) -> None:
+        celebrate = _load()
+        saved = {
+            key: os.environ.pop(key, None)
+            for key in (
+                "PR_TITLE",
+                "DRY_RUN",
+                "PR_AUTHOR",
+                "PR_NUMBER",
+                "GITHUB_OUTPUT",
+            )
+        }
+        try:
+            os.environ["DRY_RUN"] = "1"
+            os.environ["PR_AUTHOR"] = "alice"
+            os.environ["PR_NUMBER"] = "1"
+
+            # Case 1: no-cheer: bump lockfile does not build a comment
+            os.environ["PR_TITLE"] = "no-cheer: bump lockfile"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = celebrate.main()
+            self.assertEqual(code, 0)
+            self.assertIn("skip cheer requested", buf.getvalue())
+            self.assertNotIn("Merged — thank you", buf.getvalue())
+
+            # Case 2: [skip cheer] fix login does not build a comment
+            os.environ["PR_TITLE"] = "[skip cheer] fix login"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = celebrate.main()
+            self.assertEqual(code, 0)
+            self.assertIn("skip cheer requested", buf.getvalue())
+            self.assertNotIn("Merged — thank you", buf.getvalue())
+
+            # Case 3: normal fix: login still gets a GIF
+            os.environ["PR_TITLE"] = "fix: login"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = celebrate.main()
+            self.assertEqual(code, 0)
+            self.assertIn("Merged — thank you @alice.", buf.getvalue())
+            self.assertIn(".gif", buf.getvalue())
+        finally:
+            for key, value in saved.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
 
 if __name__ == "__main__":
