@@ -127,9 +127,14 @@
       <li>The comment is a thank-you plus a G-rated GIF the Action already ships. No Giphy key.</li>
     </ol>
     <div class="comment">
-      <p class="who">The comment looks like this</p>
+      <p class="who">Zero-config comment</p>
       <p>Merged — thank you @alice and @bob.</p>
       <img src="gifs/comic/pop.gif" alt="comic celebration GIF posted on the merged pull request">
+    </div>
+    <div class="comment">
+      <p class="who">With an OpenAI key — live on <a href="https://github.com/YauhenBichel/merge-cheer/pull/53#issuecomment-5574024316">#53</a></p>
+      <p>Cheers to YauhenBichel for keeping model cheers that are about the pull request!</p>
+      <img src="https://raw.githubusercontent.com/YauhenBichel/merge-cheer/main/gifs/celebration/celebration.gif" alt="celebration GIF from the model-written #53 comment">
     </div>
 
     <h2>Live loops</h2>
@@ -201,6 +206,19 @@ jobs:
       TOPIC: auto
       BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN</pre>
     <p class="mute">Until the Docker image is public, use the curl job in the example. A <a href="https://support.atlassian.com/bitbucket-cloud/docs/what-are-pipes/">Pipes</a> UI listing needs an Atlassian review — same <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/MARKETPLACES.md">MARKETPLACES.md</a>.</p>
+
+    <h2 id="model">Use a model on your repo</h2>
+    <p>Zero-config stays a GIF plus <code>Merged — thank you @author</code>. Add one repository secret and the Action writes a line about <em>what merged</em>. Generic thanks are dropped. A 429 or a bad reply falls back to the stdlib line. The job still does not check out the pull request head.</p>
+    <ol class="steps">
+      <li>Settings → Secrets and variables → Actions → New repository secret named <code>OPENAI_API_KEY</code>.</li>
+      <li>Copy <a href="https://github.com/YauhenBichel/merge-cheer/blob/main/examples/celebrate-openai.yml">examples/celebrate-openai.yml</a> onto the default branch.</li>
+      <li>Merge a human pull request. Read the comment, then the job log for <code>model: group=… message=…</code>.</li>
+    </ol>
+    <pre>- uses: YauhenBichel/merge-cheer@e183fbc7b8e395506e627ff60600577dfb5f8f45
+  with:
+    model: gpt-4o-mini
+    model-api-key: ${{ secrets.OPENAI_API_KEY }}</pre>
+    <p class="mute">Pin that SHA until the next release. <code>@v1.6.0</code> can call a model but still accepts a generic thanks. Any OpenAI-compatible host works via <code>model-base-url</code>.</p>
 
     <h2>Used by</h2>
     <p>8 public repositories already run Merge Cheer on the default branch, pinned to <code>@v1.6.0</code>.</p>
