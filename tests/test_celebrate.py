@@ -512,6 +512,7 @@ class CelebrateTest(unittest.TestCase):
         self.assertIn("docs/contributors", text)
         self.assertIn("gh pr create", text)
         self.assertIn("gh pr merge", text)
+        self.assertIn('gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash', text)
         self.assertNotIn("--jq .number", text)
         self.assertNotIn(
             "GitHub Actions is not permitted to create or approve pull requests",
