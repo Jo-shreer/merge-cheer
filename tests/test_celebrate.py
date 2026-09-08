@@ -1752,6 +1752,7 @@ class CelebrateTest(unittest.TestCase):
 
     def test_main_uses_model_on_closed_and_keeps_coffee_gif(self) -> None:
         celebrate = _load()
+        model_payload = {}
         saved = {
             key: os.environ.pop(key, None)
             for key in (
@@ -1787,8 +1788,11 @@ class CelebrateTest(unittest.TestCase):
             os.environ["MODEL_API_KEY"] = "sk-test"
             celebrate.list_github_comments = lambda *_a, **_k: []  # type: ignore[method-assign]
             celebrate.list_pr_commit_messages = lambda *_a, **_k: []  # type: ignore[method-assign]
+            celebrate.list_pr_files = lambda *_a, **_k: ["README.md"]  # type: ignore[method-assign]
 
             def fake_ok(_url, _token, method="GET", payload=None, headers=None):
+                if method == "POST":
+                    model_payload.update(payload or {})
                 return {
                     "choices": [
                         {
@@ -1812,6 +1816,10 @@ class CelebrateTest(unittest.TestCase):
             self.assertIn("gifs/coffee/", out)
             self.assertNotIn("Closed — thank you for the work", out)
             self.assertNotIn("gifs/yeah/", out)
+            self.assertEqual(
+            json.loads(model_payload["messages"][1]["content"])["files"],
+            ["README.md"],
+        )
         finally:
             for key, value in saved.items():
                 if value is None:
@@ -1888,6 +1896,26 @@ class CelebrateTest(unittest.TestCase):
                     os.environ.pop(key, None)
                 else:
                     os.environ[key] = value
+
+
+    def test_cheer_is_specific_from_changed_filename(self) -> None:
+        celebrate = _load()
+        self.assertTrue(
+            celebrate.cheer_is_specific(
+                "Improve setup",
+                "README updates are looking good — thanks @alice.",
+                ["README.md"]
+            )
+        )
+    def test_generic_cheer_is_not_specific_from_changed_filename(self) -> None:
+        celebrate = _load()
+        self.assertFalse(
+            celebrate.cheer_is_specific(
+                "Improve setup",
+                "Great work everyone!",
+                ["README.md"],
+            )
+        )
 
 
 if __name__ == "__main__":

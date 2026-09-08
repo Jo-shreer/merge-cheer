@@ -1044,6 +1044,21 @@ def list_pr_reviewers(token: str, repo: str, number: str) -> list[str]:
     return people
 
 
+def list_pr_files(token: str, repo: str, number: str) -> list[str]:
+    data = _http_json(
+        f"https://api.github.com/repos/{repo}/pulls/{number}/files?per_page=100",
+        token,
+        headers=_github_headers(token),
+    )
+    if not isinstance(data, list):
+        return []
+    return [
+        item["filename"]
+        for item in data
+        if isinstance(item, dict) and isinstance(item.get("filename"), str)
+    ]
+
+
 def model_settings() -> tuple[str, str, str] | None:
     """Return (api_key, model, base_url) when a model call is allowed."""
     name = os.environ.get("MODEL", "").strip()
@@ -1148,7 +1163,7 @@ def with_title_hint(
     return text.replace(" — ", insert, 1)
 
 
-def cheer_is_specific(title: str, message: str) -> bool:
+def cheer_is_specific(title: str, message: str, files: list[str] | None = None,) -> bool:
     line = (message or "").strip()
     if not is_grated(line):
         return False
@@ -1158,6 +1173,8 @@ def cheer_is_specific(title: str, message: str) -> bool:
     if _GENERIC_CHEER.match(line) or _GENERIC_CHEER.match(stripped):
         return False
     tokens = title_tokens(title)
+    for filename in files or []:
+        tokens.update(title_tokens(filename))
     if not tokens:
         return True
     low = line.lower()
@@ -1193,6 +1210,7 @@ def ask_model(
     body: str,
     author: str,
     authors: str,
+    files: list[str] | None = None,
 ) -> str | None:
     cfg = model_settings()
     if not cfg:
@@ -1217,6 +1235,7 @@ def ask_model(
             "body": excerpt,
             "author": author,
             "authors": authors,
+            "files": files or [],
         }
     )
     url = f"{base.rstrip('/')}/chat/completions"
@@ -1247,7 +1266,7 @@ def ask_model(
             ) else {}
             content = str(message.get("content") or "")
     line = _parse_model_payload(content)
-    if not line or not cheer_is_specific(title, line):
+    if not line or not cheer_is_specific(title, line, files):
         print("model skipped: generic or unsafe", file=sys.stderr)
         return None
     print(f"model: message={line}", file=sys.stderr)
@@ -1627,7 +1646,10 @@ def main() -> int:
     authors = format_authors(logins)
     group = resolve_group(title, topic, association, number, pr_body)
     if message_is_default(moment, message):
-        hinted = ask_model(moment, title, pr_body, author, authors)
+        files: list[str] = []
+        if host == "github" and model_settings():
+            files = list_pr_files(token, repo, number)
+        hinted = ask_model(moment, title, pr_body, author, authors, files)
         if hinted:
             message = hinted
         else:
